@@ -20,6 +20,10 @@
                                                     :last_name "Amata"
                                                     :gender "F"
                                                     :birthday "1947-12-29"
+                                                    :social {:twitter "RepAmata"
+                                                             :facebook "congresswomanaumuaamata"
+                                                             :facebook_id "1537155909907320"
+                                                             :youtube_id "UCGdrLQbt1PYDTPsampx4t1A"}
                                                     :current_term {:type "rep"
                                                                    :start "2015-01-06"
                                                                    :end "2017-01-03"
