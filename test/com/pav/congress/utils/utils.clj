@@ -7,6 +7,7 @@
 
 (def legislators (parse-string (slurp "test-resources/congress-legislators/legislators-current.yaml") true))
 (def legislators-social-media (parse-string (slurp "test-resources/congress-legislators/legislators-social-media.yaml") true))
+(def committees (parse-string (slurp "test-resources/congress-legislators/committees-current.yaml") true))
 
 (defn clean-congress-index []
   (delete connection "congress")

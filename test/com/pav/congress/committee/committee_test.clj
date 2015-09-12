@@ -1,8 +1,7 @@
 (ns com.pav.congress.committee.committee-test
   (:use midje.sweet)
   (:require [com.pav.congress.utils.utils :refer [clean-congress-index
-                                                  legislators
-                                                  legislators-social-media
+                                                  committees
                                                   connection]]
             [clojurewerkz.elastisch.rest.document :as esd]))
 
