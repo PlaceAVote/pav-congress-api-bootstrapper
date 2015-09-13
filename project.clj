@@ -14,10 +14,7 @@
   :main com.pav.congress.main
   :min-lein-version "2.0.0"
   :javac-options ["-target" "1.8" "-source" "1.8"]
-  :profiles {:prod {
-
-                    }
-             :uberjar {:aot :all
+  :profiles {:uberjar {:aot :all
                        :uberjar-name "pav-congress-api-bootstrapper.jar"}
              :dev {
                    :dependencies [[midje "1.7.0"]]
