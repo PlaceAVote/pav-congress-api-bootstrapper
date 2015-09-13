@@ -1,35 +1,49 @@
-FROM clojure
+FROM ubuntu:14.04
+
+MAINTAINER john@placeavote.com
 
 RUN apt-get update
+
+RUN apt-get -y install software-properties-common
+
+# Install Java.
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /var/cache/oracle-jdk8-installer
+
+# Define commonly used JAVA_HOME variable
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
+# Install Leiningen 2.5.0 and make executable
+RUN apt-get install wget
+
+# Leiningen
+ENV LEIN_ROOT true
+
+RUN wget -q -O /usr/bin/lein \
+    https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
+    && chmod +x /usr/bin/lein
+
+RUN lein
 
 # Install the cron service
 RUN apt-get install cron -y
 
-RUN pwd
+#Add code
+ADD . /root/code
 
-WORKDIR /app
+RUN chmod -R 700 /root/code/scripts/run.sh
 
-COPY . /app
+RUN chown -R root /root/code
 
-RUN ls -ltr
-
-#Build jar file
-RUN lein uberjar
-
-#Copy jar to root of directory
-RUN ls -ltr
-
-RUN cp target/uberjar/pav-congress-api-bootstrapper.jar pav-congress-api-bootstrapper.jar
-
-# Make cron log file
 RUN mkdir -p /var/log && touch /var/log/cron.log
 
-RUN whoami
-RUN chown -R root /app
-RUN chmod -R 700 /app/scripts/run.sh
-
 #Use the crontab file
-RUN crontab /app/scripts/crontab
+RUN crontab /root/code/scripts/crontab
 
 #Run Job
-CMD ["/bin/bash", "scripts/startup.sh", "tail -0f /var/log/cron.log"]
+CMD ["/bin/bash", "/root/code/scripts/startup.sh", "tail -0f /var/log/cron.log"]

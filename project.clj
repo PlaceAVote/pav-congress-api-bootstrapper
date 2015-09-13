@@ -19,8 +19,8 @@
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
-                   :env {:access-key "AKIAJPQP6GFOO2N7YCXA"
-                         :secret-key "QL4wfB7xaq6kPMG/1FPxn8yHHTP2YMrtyUWVYPAw"
+                   :env {:access-key "REPLACE HERE"
+                         :secret-key "REPLACE HERE"
                          :legislator-bucket "congress-bulk-data"
                          :legislator-prefix "congress-legislators/legislators-current.yaml"
                          :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"
