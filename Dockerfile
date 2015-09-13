@@ -2,8 +2,6 @@ FROM ubuntu:14.04
 
 MAINTAINER john@placeavote.com
 
-RUN echo "Building Image 2"
-
 RUN apt-get update
 
 RUN apt-get -y install software-properties-common
@@ -43,6 +41,8 @@ RUN chmod -R 700 /root/code/scripts/run.sh
 RUN chown -R root /root/code
 
 RUN mkdir -p /var/log && touch /var/log/cron.log
+
+RUN echo "Building Image 3"
 
 #Use the crontab file
 RUN crontab /root/code/scripts/crontab
