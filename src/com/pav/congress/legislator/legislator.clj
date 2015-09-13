@@ -32,12 +32,14 @@
        (map cleanse-legislator)))
 
 (defn merge-social-info [legislators social-media-details]
-  (map (fn [social-details]
-         (let [legislator (find-legislator-by-thomas
-                            legislators
-                            (get-in social-details [:id :thomas]))
-               social (get-in social-details [:social])]
-           (assoc legislator :social social))) social-media-details))
+  (filter (complement nil?)
+          (map (fn [social-details]
+           (let [legislator (find-legislator-by-thomas
+                              legislators
+                              (get-in social-details [:id :thomas]))
+                 social (get-in social-details [:social])]
+             (if-not (empty? legislator)
+               (assoc legislator :social social)))) social-media-details)))
 
 (defn persist-legislators [connection legislators social-media-details]
   (let [cleansed-legislators (cleanse-legislators legislators)

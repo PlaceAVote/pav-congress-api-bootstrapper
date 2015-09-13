@@ -6,10 +6,19 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [environ "1.0.0"]
                  [clj-yaml "0.4.0"]
-                 [clojurewerkz/elastisch "2.1.0"]]
+                 [clojurewerkz/elastisch "2.1.0"]
+                 [clj-aws-s3 "0.3.10"]
+                 [org.clojure/tools.logging "0.3.1"]]
+  :plugins [[lein-environ "1.0.0"]]
   :target-path "target/%s"
+  :main com.pav.congress.main
   :profiles {:uberjar {:aot :all}
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
-                   }})
+                   :env {:cred {:access-key "AKIAJPQP6GFOO2N7YCXA"
+                                :secret-key "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"}
+                         :legislator {:bucket "congress-bulk-data"
+                                      :legislator-prefix "congress-legislators/legislators-current.yaml"
+                                      :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"}
+                         :es-url "http://localhost:9200"}}})
