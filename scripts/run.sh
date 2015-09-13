@@ -2,4 +2,4 @@
 #Run Job
 cd /root/code
 ls -ltr
-lein run
+lein lein with-profile prod run

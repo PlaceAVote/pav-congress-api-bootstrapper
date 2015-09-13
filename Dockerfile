@@ -2,6 +2,8 @@ FROM ubuntu:14.04
 
 MAINTAINER john@placeavote.com
 
+RUN echo "Building Image 2"
+
 RUN apt-get update
 
 RUN apt-get -y install software-properties-common
