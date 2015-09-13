@@ -1,0 +1,11 @@
+main:
+  build: .
+  environment:
+    - ACCESS_KEY=AKIAJPQP6GFOO2N7YCXA
+    - SECRET_KEY=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
+    - LEGISLATOR_BUCKET=congress-bulk-data
+    - LEGISLATOR_PREFIX=congress-legislators/legislators-current.yaml
+    - SOCIALMEDIA_PREFIX=congress-legislators/legislators-social-media.yaml
+    - ES_URL=http://localhost:9200
+  volumes:
+    - .:/app

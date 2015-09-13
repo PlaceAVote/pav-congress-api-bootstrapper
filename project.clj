@@ -12,13 +12,16 @@
   :plugins [[lein-environ "1.0.0"]]
   :target-path "target/%s"
   :main com.pav.congress.main
-  :profiles {:uberjar {:aot :all}
+  :min-lein-version "2.0.0"
+  :javac-options ["-target" "1.8" "-source" "1.8"]
+  :profiles {:uberjar {:aot :all
+                       :uberjar-name "pav-congress-api-bootstrapper.jar"}
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
-                   :env {:cred {:access-key "AKIAJPQP6GFOO2N7YCXA"
-                                :secret-key "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"}
-                         :legislator {:bucket "congress-bulk-data"
-                                      :legislator-prefix "congress-legislators/legislators-current.yaml"
-                                      :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"}
+                   :env {:access-key "AKIAJPQP6GFOO2N7YCXA"
+                         :secret-key "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"
+                         :legislator-bucket "congress-bulk-data"
+                         :legislator-prefix "congress-legislators/legislators-current.yaml"
+                         :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"
                          :es-url "http://localhost:9200"}}})
