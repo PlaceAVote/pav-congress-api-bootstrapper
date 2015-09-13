@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 #Run Job
-cd /root/code
+cd /app
 ls -ltr
-lein with-profile prod run
+java -jar /app/pav-congress-api-bootstrapper.jar
