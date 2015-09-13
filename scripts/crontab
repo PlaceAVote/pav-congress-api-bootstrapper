@@ -1,5 +1,5 @@
 * * * * * echo "I'm alive" >> /var/log/cron.log 2>&1
 
-* * * * * /root/code/scripts/run.sh >> /var/log/cron.log 2>&1
+55 18 * * * /root/code/scripts/run.sh >> /var/log/cron.log 2>&1
 
 #Don't remove new line
