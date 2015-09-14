@@ -8,7 +8,8 @@
                  [clj-yaml "0.4.0"]
                  [clojurewerkz/elastisch "2.1.0"]
                  [clj-aws-s3 "0.3.10"]
-                 [org.clojure/tools.logging "0.3.1"]]
+                 [org.clojure/tools.logging "0.3.1"]
+                 [cheshire "5.5.0"]]
   :plugins [[lein-environ "1.0.0"]]
   :target-path "target/%s"
   :main com.pav.congress.main

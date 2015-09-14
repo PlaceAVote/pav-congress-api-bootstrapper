@@ -1,7 +1,8 @@
 (ns com.pav.congress.utils.utils
   (:require [clojurewerkz.elastisch.rest :refer [connect]]
             [clojurewerkz.elastisch.rest.index :refer [create delete]]
-            [clj-yaml.core :refer [parse-string]]))
+            [clj-yaml.core :refer [parse-string]]
+            [cheshire.core :as ch]))
 
 (def connection (connect))
 
@@ -9,6 +10,8 @@
 (def legislators-social-media (parse-string (slurp "test-resources/congress-legislators/legislators-social-media.yaml") true))
 (def committees (parse-string (slurp "test-resources/congress-legislators/committees-current.yaml") true))
 (def committee-members (parse-string (slurp "test-resources/congress-legislators/committee-membership-current.yaml") true))
+
+(def bills [(ch/parse-string (slurp "test-resources/bills/hr/hr2/data.json") true)])
 
 (defn clean-congress-index []
   (delete connection "congress")
