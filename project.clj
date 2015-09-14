@@ -19,9 +19,11 @@
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
-                   :env {:access-key "REPLACE HERE"
-                         :secret-key "REPLACE HERE"
+                   :env {:access-key "REPLACE"
+                         :secret-key "REPLACE"
                          :legislator-bucket "congress-bulk-data"
                          :legislator-prefix "congress-legislators/legislators-current.yaml"
                          :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"
+                         :committees-prefix "congress-legislators/committees-current.yaml"
+                         :committee-members "congress-legislators/committee-membership-current.yaml"
                          :es-url "http://localhost:9200"}}})

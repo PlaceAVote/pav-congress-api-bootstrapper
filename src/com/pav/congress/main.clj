@@ -1,6 +1,7 @@
 (ns com.pav.congress.main
   (:gen-class)
   (:require [com.pav.congress.jobs.legislator :refer [sync-legislators]]
+            [com.pav.congress.jobs.committee :refer [sync-committees]]
             [environ.core :refer [env]]
             [clojurewerkz.elastisch.rest :refer [connect]]
             [clojure.tools.logging :as log]))
@@ -9,6 +10,7 @@
   (log/info (str "Environment " env))
   (let [es-connection (connect (:es-url env))
         creds (select-keys env [:access-key :secret-key])
-        legislator-info (assoc (select-keys env [:legislator-bucket :legislator-prefix])
-                          :socialmedia-prefix (:socialmedia-prefix env))]
-    (sync-legislators es-connection creds legislator-info)))
+        legislator-info (select-keys env [:legislator-bucket :legislator-prefix :socialmedia-prefix])
+        committee-info (select-keys env [:legislator-bucket :committees-prefix :committee-members])]
+    (sync-legislators es-connection creds legislator-info)
+    (sync-committees es-connection creds committee-info)))

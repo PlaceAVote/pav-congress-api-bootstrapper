@@ -1,9 +1,9 @@
 worker:
   build: .
   environment:
-    - ACCESS_KEY=REPLACE KEY
-    - SECRET_KEY=REPLACE SECRET
+    - ACCESS_KEY=REPLACE
+    - SECRET_KEY=REPLACE
     - LEGISLATOR_BUCKET=congress-bulk-data
     - LEGISLATOR_PREFIX=congress-legislators/legislators-current.yaml
     - SOCIALMEDIA_PREFIX=congress-legislators/legislators-social-media.yaml
-    - ES_URL=http://elasticsearch-545034814.us-west-2.elb.amazonaws.com:9200
+    - ES_URL=REPLACE
