@@ -9,7 +9,8 @@
                  [clojurewerkz/elastisch "2.1.0"]
                  [clj-aws-s3 "0.3.10"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [cheshire "5.5.0"]]
+                 [cheshire "5.5.0"]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]]
   :plugins [[lein-environ "1.0.0"]]
   :target-path "target/%s"
   :main com.pav.congress.main
@@ -20,11 +21,12 @@
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
-                   :env {:access-key "REPLACE"
-                         :secret-key "REPLACE"
+                   :env {:access-key "REPLACE_HERE"
+                         :secret-key "REPLACE_HERE"
                          :legislator-bucket "congress-bulk-data"
                          :legislator-prefix "congress-legislators/legislators-current.yaml"
                          :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"
                          :committees-prefix "congress-legislators/committees-current.yaml"
                          :committee-members "congress-legislators/committee-membership-current.yaml"
+                         :bills-prefix "congress/114/bills/"
                          :es-url "http://localhost:9200"}}})

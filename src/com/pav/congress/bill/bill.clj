@@ -1,5 +1,6 @@
 (ns com.pav.congress.bill.bill
-  (:require [clojurewerkz.elastisch.rest.bulk :as esrb]))
+  (:require [clojurewerkz.elastisch.rest.bulk :as esrb]
+            [clojure.tools.logging :as log]))
 
 (defn apply-id [bill]
   (assoc bill :_id (get-in bill [:bill_id])))
@@ -9,19 +10,23 @@
     "hr" "house-bill"
     "hres" "house-resolution"
     "hconres" "house-concurrent-resolution"
+    "hjres" "house-joint-resolution"
     "s" "senate-bill"
     "sres" "senate-resolution"
     "sconres" "senate-concurrent-resolution"
-    "sjres" "senate-joint-resolution"))
+    "sjres" "senate-joint-resolution"
+    nil))
 
 (defn get-urls [bill]
   (let [congress (:congress bill)
         type (:bill_type bill)
         number (:number bill)
         bill_id (:bill_id bill)]
-    {:congress (str "http://beta.congress.gov/bill/" congress "th/" (get-bill-type type) "/" number)
-     :govtrack (str "https://www.govtrack.us/congress/bills/" congress "/" type number)
-     :opencongress (str "https://www.opencongress.org/bill/" bill_id)}))
+    (if (nil? type)
+      {:opencongress (str "https://www.opencongress.org/bill/" bill_id)}
+      {:congress (str "http://beta.congress.gov/bill/" congress "th/" (get-bill-type type) "/" number)
+       :govtrack (str "https://www.govtrack.us/congress/bills/" congress "/" type number)
+       :opencongress (str "https://www.opencongress.org/bill/" bill_id)})))
 
 (defn filter-votes-from-actions [actions]
   (filterv #(= "vote" (:type %)) actions))
@@ -43,7 +48,6 @@
       (assoc :status (get-in bill [:status]))
       (assoc :history (get-in bill [:history]))
       (assoc :sponsor (get-in bill [:sponsor]))
-      ;(assoc :summary (get-in bill [:summary :text]))
       (assoc :cosponsors_count (count (get-in bill [:cosponsors])))
       (assoc :related_bill_id (map :bill_id (get-in bill [:related_bills])))
       (assoc :last_action (last (get-in bill [:actions])))
@@ -59,4 +63,5 @@
   (let [cleansed-bills (cleanse-bills bills)
         bills-with-ids (map apply-id cleansed-bills)
         bulk-payload (esrb/bulk-index bills-with-ids)]
-    (esrb/bulk-with-index-and-type connection "congress" "bill" bulk-payload)))
+    (log/info (str "Persisting " (count bulk-payload) " Bills to Elasticsearch"))
+      (esrb/bulk-with-index-and-type connection "congress" "bill" bulk-payload)))
