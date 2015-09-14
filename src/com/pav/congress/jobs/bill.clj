@@ -44,19 +44,21 @@
                                         :truncated? truncated?
                                         :delimiter delimiter})]
       (gather-all-keys-for cred (into keys (mapv filter-json-keys objects)) bucket prefix next-marker truncated? delimiter))
-    (conj keys :finished)))
+    (do (log/info "Finished gathering Bill keys from s3")
+        (conj keys :finished))))
 
 (defn sync-bills [es-connection cred s3-info]
   (log/info "Started Syncing Bills")
   (let [promise (promise)
         channel (chan 1024)
         _ (batch-and-persist es-connection channel 100 promise)
-        _ (->> (gather-all-keys-for cred [] (:legislator-bucket s3-info) (:bills-prefix s3-info) nil true nil)
-                   (filterv (complement nil?))
-                   (map (fn [key]
-                          (log/info (str "Reading Bill " key))
-                          (if (= key :finished)
-                            (>!! channel {:drained true})
-                            (>!! channel (ch/parse-string (slurp (:content (s3/get-object cred (:legislator-bucket s3-info) key))) true))))))]
+        keys (->> (gather-all-keys-for cred [] (:legislator-bucket s3-info) (:bills-prefix s3-info) nil true nil)
+                  (filterv (complement nil?)))]
+    (println keys)
+    (doseq [key keys]
+      (log/info (str "Reading Bill " key))
+      (if (= key :finished)
+        (>!! channel {:drained true})
+        (>!! channel (ch/parse-string (slurp (:content (s3/get-object cred (:legislator-bucket s3-info) key))) true))))
     @promise
     (log/info "Finished Syncing Bills")))
