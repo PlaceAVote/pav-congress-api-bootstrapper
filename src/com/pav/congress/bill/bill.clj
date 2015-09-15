@@ -31,29 +31,33 @@
 (defn filter-votes-from-actions [actions]
   (filterv #(= "vote" (:type %)) actions))
 
-(defn get-last-vote [bill]
-  (let [votes (filter-votes-from-actions (get-in bill [:actions]))]
-    (last votes)))
-
 (defn cleanse-bill [bill]
-  (-> {}
-      (assoc :bill_id (get-in bill [:bill_id]))
-      (assoc :bill_type (get-in bill [:bill_type]))
-      (assoc :number (get-in bill [:number]))
-      (assoc :congress (get-in bill [:congress]))
-      (assoc :introduced_at (get-in bill [:introduced_at]))
-      (assoc :subject (get-in bill [:subjects_top_term]))
-      (assoc :short_title (get-in bill [:short_title]))
-      (assoc :official_title (get-in bill [:official_title]))
-      (assoc :status (get-in bill [:status]))
-      (assoc :history (get-in bill [:history]))
-      (assoc :sponsor (get-in bill [:sponsor]))
-      (assoc :cosponsors_count (count (get-in bill [:cosponsors])))
-      (assoc :related_bill_id (map :bill_id (get-in bill [:related_bills])))
-      (assoc :last_action (last (get-in bill [:actions])))
-      (assoc :urls (get-urls bill))
-      (assoc :last_vote (get-last-vote bill))
-      (assoc :summary (get-in bill [:summary :text]))))
+  (let [last-action (last (get-in bill [:actions]))
+        vote-actions (filter-votes-from-actions (get-in bill [:actions]))
+        last-vote (last vote-actions)]
+    (-> {}
+        (assoc :bill_id (get-in bill [:bill_id]))
+        (assoc :bill_type (get-in bill [:bill_type]))
+        (assoc :number (get-in bill [:number]))
+        (assoc :congress (get-in bill [:congress]))
+        (assoc :introduced_at (get-in bill [:introduced_at]))
+        (assoc :last_action_at (:acted_at last-action))
+        (assoc :last_vote_at (:acted_at last-vote))
+        (assoc :updated_at (get-in bill [:updated_at]))
+        (assoc :subject (get-in bill [:subjects_top_term]))
+        (assoc :short_title (get-in bill [:short_title]))
+        (assoc :official_title (get-in bill [:official_title]))
+        (assoc :status (get-in bill [:status]))
+        (assoc :history (get-in bill [:history]))
+        (assoc :sponsor (get-in bill [:sponsor]))
+        (assoc :cosponsors_count (count (get-in bill [:cosponsors])))
+        (assoc :related_bill_id (map :bill_id (get-in bill [:related_bills])))
+        (assoc :last_action last-action)
+        (assoc :urls (get-urls bill))
+        (assoc :last_vote last-vote)
+        (assoc :summary (get-in bill [:summary :text]))
+        (assoc :keywords (get-in bill [:subjects]))
+        (assoc :votes vote-actions))))
 
 (defn cleanse-bills [bills]
   (->> bills

@@ -54,7 +54,6 @@
         _ (batch-and-persist es-connection channel 100 promise)
         keys (->> (gather-all-keys-for cred [] (:legislator-bucket s3-info) (:bills-prefix s3-info) nil true nil)
                   (filterv (complement nil?)))]
-    (println keys)
     (doseq [key keys]
       (log/info (str "Reading Bill " key))
       (if (= key :finished)

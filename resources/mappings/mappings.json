@@ -1,0 +1,251 @@
+{
+  "congress": {
+      "bill": {
+        "properties": {
+          "bill_id": {
+            "type": "string"
+          },
+          "bill_type": {
+            "type": "string"
+          },
+          "congress": {
+            "type": "string"
+          },
+          "cosponsors_count": {
+            "type": "long"
+          },
+          "history": {
+            "properties": {
+              "active": {
+                "type": "boolean"
+              },
+              "active_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "awaiting_signature": {
+                "type": "boolean"
+              },
+              "enacted": {
+                "type": "boolean"
+              },
+              "enacted_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "house_passage_result": {
+                "type": "string"
+              },
+              "house_passage_result_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "senate_cloture_result": {
+                "type": "string"
+              },
+              "senate_cloture_result_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "senate_override_result": {
+                "type": "string"
+              },
+              "senate_override_result_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "senate_passage_result": {
+                "type": "string"
+              },
+              "senate_passage_result_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "vetoed": {
+                "type": "boolean"
+              },
+              "vetoed_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              }
+            }
+          },
+          "introduced_at": {
+            "type": "date",
+            "format": "dateOptionalTime"
+          },
+          "last_action": {
+            "properties": {
+              "acted_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "bill_ids": {
+                "type": "string"
+              },
+              "calendar": {
+                "type": "string"
+              },
+              "committee": {
+                "type": "string"
+              },
+              "committees": {
+                "type": "string"
+              },
+              "congress": {
+                "type": "string"
+              },
+              "how": {
+                "type": "string"
+              },
+              "law": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              },
+              "references": {
+                "properties": {
+                  "reference": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              },
+              "result": {
+                "type": "string"
+              },
+              "roll": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "suspension": {
+                "type": "boolean"
+              },
+              "text": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "under": {
+                "type": "string"
+              },
+              "vote_type": {
+                "type": "string"
+              },
+              "where": {
+                "type": "string"
+              }
+            }
+          },
+          "last_vote": {
+            "properties": {
+              "acted_at": {
+                "type": "date",
+                "format": "dateOptionalTime"
+              },
+              "how": {
+                "type": "string"
+              },
+              "references": {
+                "properties": {
+                  "reference": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              },
+              "result": {
+                "type": "string"
+              },
+              "roll": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "suspension": {
+                "type": "boolean"
+              },
+              "text": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "vote_type": {
+                "type": "string"
+              },
+              "where": {
+                "type": "string"
+              }
+            }
+          },
+          "number": {
+            "type": "string"
+          },
+          "official_title": {
+            "type": "string"
+          },
+          "related_bill_id": {
+            "type": "string"
+          },
+          "short_title": {
+            "type": "string"
+          },
+          "sponsor": {
+            "properties": {
+              "district": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "thomas_id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "urls": {
+            "properties": {
+              "congress": {
+                "type": "string"
+              },
+              "govtrack": {
+                "type": "string"
+              },
+              "opencongress": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
