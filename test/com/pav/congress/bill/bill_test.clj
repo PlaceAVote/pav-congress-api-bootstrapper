@@ -20,6 +20,7 @@
                                    :last_action_at "2015-04-16"
                                    :last_vote_at "2015-04-14"
                                    :updated_at "2015-09-12T06:19:12-04:00"
+                                   :sponsor_id "01751"
                                    :sponsor {:district "26"
                                              :name "Burgess, Michael C."
                                              :state "TX"

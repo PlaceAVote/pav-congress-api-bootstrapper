@@ -34,7 +34,8 @@
 (defn cleanse-bill [bill]
   (let [last-action (last (get-in bill [:actions]))
         vote-actions (filter-votes-from-actions (get-in bill [:actions]))
-        last-vote (last vote-actions)]
+        last-vote (last vote-actions)
+        sponsor-details (get-in bill [:sponsor])]
     (-> {}
         (assoc :bill_id (get-in bill [:bill_id]))
         (assoc :bill_type (get-in bill [:bill_type]))
@@ -49,7 +50,8 @@
         (assoc :official_title (get-in bill [:official_title]))
         (assoc :status (get-in bill [:status]))
         (assoc :history (get-in bill [:history]))
-        (assoc :sponsor (get-in bill [:sponsor]))
+        (assoc :sponsor_id (get-in sponsor-details [:thomas_id]))
+        (assoc :sponsor sponsor-details)
         (assoc :cosponsors_count (count (get-in bill [:cosponsors])))
         (assoc :related_bill_id (map :bill_id (get-in bill [:related_bills])))
         (assoc :last_action last-action)

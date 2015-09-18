@@ -1,5 +1,7 @@
 FROM clojure
 
+RUN echo "Building Image"
+
 WORKDIR /app
 
 COPY . /app
