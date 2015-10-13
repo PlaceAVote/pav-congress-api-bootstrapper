@@ -5,7 +5,10 @@
                                                   legislators-social-media
                                                   connection]]
             [clojurewerkz.elastisch.rest.document :as esd]
-            [com.pav.congress.legislator.legislator :refer [persist-legislators]]))
+            [com.pav.congress.legislator.legislator :refer [persist-legislators]]
+            [environ.core :refer [env]]))
+
+(def photo-bucket-url (:photo-bucket-url env))
 
 (against-background [(before :facts (clean-congress-index))]
   (facts "Test cases cover processing legislator information from various yaml files, parsing and persisting them
@@ -34,4 +37,7 @@
                                                          :office "1339 Longworth House Office Building"
                                                          :phone "202-225-8577"
                                                          :url "https://radewagen.house.gov"
-                                                         :fax "202-225-8757"}}))))
+                                                         :fax "202-225-8757"}
+                                          :img_urls {:200px (str photo-bucket-url "/412664-200px.jpeg")
+                                                     :100px (str photo-bucket-url "/412664-100px.jpeg")
+                                                     :50px (str photo-bucket-url "/412664-50px.jpeg")}}))))

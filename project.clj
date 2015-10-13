@@ -29,4 +29,5 @@
                          :committees-prefix "congress-legislators/committees-current.yaml"
                          :committee-members "congress-legislators/committee-membership-current.yaml"
                          :bills-prefix "congress/114/bills/"
+                         :photo-bucket-url "https://s3-us-west-2.amazonaws.com/congress-bulk-data/photos"
                          :es-url "http://localhost:9200"}}})

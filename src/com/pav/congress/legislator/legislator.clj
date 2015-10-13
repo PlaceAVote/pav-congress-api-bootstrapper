@@ -1,12 +1,21 @@
 (ns com.pav.congress.legislator.legislator
   (:require [clojurewerkz.elastisch.rest.document :refer [create]]
-            [clojurewerkz.elastisch.rest.bulk :as esrb]))
+            [clojurewerkz.elastisch.rest.bulk :as esrb]
+            [environ.core :refer [env]]))
+
+(def photo-bucket-url (:photo-bucket-url env))
 
 (defn append-id [legislator]
   (assoc legislator :_id (get-in legislator [:thomas])))
 
 (defn apply-legislator-ids [legislators]
   (map append-id legislators))
+
+(defn construct-img-url-paths [legislator]
+  (let [govtrack_id (:govtrack legislator)]
+    (assoc legislator :img_urls {:200px (str photo-bucket-url "/" govtrack_id "-200px.jpeg")
+                                 :100px (str photo-bucket-url "/" govtrack_id "-100px.jpeg")
+                                 :50px (str photo-bucket-url "/" govtrack_id "-50px.jpeg")})))
 
 (defn cleanse-legislator [legislator]
   (let [id-data (get-in legislator [:id])
@@ -17,6 +26,7 @@
         (assoc :thomas (get-in id-data [:thomas]))
         (assoc :bioguide (get-in id-data [:bioguide]))
         (assoc :govtrack (get-in id-data [:govtrack]))
+        (construct-img-url-paths)
         (assoc :first_name (get-in name-data [:first]))
         (assoc :last_name (get-in name-data [:last]))
         (assoc :gender (get-in bio-data [:gender]))
