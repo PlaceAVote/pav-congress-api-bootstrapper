@@ -6,9 +6,15 @@
             [com.pav.congress.elasticsearch.elasticsearch :refer [update-es-mappings]]
             [environ.core :refer [env]]
             [clojurewerkz.elastisch.rest :refer [connect]]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojurewerkz.quartzite.scheduler :as qs]
+            [clojurewerkz.quartzite.jobs :refer [defjob]]
+            [clojurewerkz.quartzite.jobs :as j]
+            [clojurewerkz.quartzite.triggers :as t]
+            [clojurewerkz.quartzite.schedule.daily-interval :refer [schedule
+                                                                    with-interval-in-hours]]))
 
-(defn -main []
+(defn start-sync-job []
   (log/info (str "Environment " env))
   (let [es-connection (connect (:es-url env))
         creds (select-keys env [:access-key :secret-key])
@@ -19,3 +25,19 @@
     (sync-legislators es-connection creds legislator-info)
     (sync-committees es-connection creds committee-info)
     (sync-bills es-connection creds bill-info)))
+
+(defjob SyncJob [ctx]
+  (start-sync-job))
+
+(defn -main
+  [& m]
+  (let [s   (-> (qs/initialize) qs/start)
+        job  (j/build
+               (j/of-type SyncJob)
+               (j/with-identity (j/key "jobs.noop.1")))
+        now-trigger (t/build
+                      (t/with-identity (t/key "triggers.1"))
+                      ;(t/start-now)
+                      (t/with-schedule (schedule
+                                         (with-interval-in-hours 5))))]
+    (qs/schedule s job now-trigger)))

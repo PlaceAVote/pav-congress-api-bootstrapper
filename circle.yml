@@ -1,0 +1,14 @@
+machine:
+  pre:
+    - curl -Ls https://install.convox.com/linux.zip > /tmp/convox.zip
+    - sudo unzip /tmp/convox.zip -d /usr/local/bin
+    - convox login convox-879923626.us-west-2.elb.amazonaws.com --password tknkFFiDruFRJOqRAmesmJNhChlPdu
+  java:
+    version: oraclejdk8
+  services:
+    - elasticsearch
+deployment:
+  development:
+    branch: master
+    commands:
+      - convox deploy

@@ -9,13 +9,17 @@
                  [clojurewerkz/elastisch "2.1.0"]
                  [clj-aws-s3 "0.3.10"]
                  [org.clojure/tools.logging "0.3.1"]
+                 [org.apache.logging.log4j/log4j-slf4j-impl "2.0.2"]
+                 [org.apache.logging.log4j/log4j-core "2.0.2"]
                  [cheshire "5.5.0"]
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [clojurewerkz/quartzite "2.0.0"]]
   :plugins [[lein-environ "1.0.0"]]
   :target-path "target/%s"
   :main com.pav.congress.main
   :min-lein-version "2.0.0"
   :javac-options ["-target" "1.8" "-source" "1.8"]
+  :resource-paths ["resources"]
   :profiles {:uberjar {:aot :all
                        :uberjar-name "pav-congress-api-bootstrapper.jar"}
              :dev {
