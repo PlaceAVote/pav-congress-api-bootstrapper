@@ -37,8 +37,7 @@
                (j/with-identity (j/key "jobs.noop.1")))
         now-trigger (t/build
                       (t/with-identity (t/key "triggers.1"))
-                      (t/start-now)
-                      ;(t/with-schedule (schedule
-                      ;                   (with-interval-in-hours 5)))
-                      )]
+                      ;(t/start-now)
+                      (t/with-schedule (schedule
+                                         (with-interval-in-hours 5))))]
     (qs/schedule s job now-trigger)))
