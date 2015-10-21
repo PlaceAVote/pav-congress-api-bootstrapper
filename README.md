@@ -1,36 +1,20 @@
 # pav-congress-api-bootstrapper
 
-FIXME: description
+The congress API requires legislative data which is stored as JSON and YAML files in s3.  This code base is responsible
+for syncing that data to various datasources so our Congress API can expose it.
 
-## Installation
+## Running Locally
 
-Download from http://example.com/FIXME.
+If you wish to sync the data from s3, AWS ACCESS_KEY and SECRET_KEY keys must be provided in the project.clj file.
 
-## Usage
+There is also a dependency on Elasticsearch.  So ensure Elasticsearch is running at http://localhost:9200 and issue the following command to start the job.
 
-FIXME: explanation
+    lein run
 
-    $ java -jar pav-congress-api-bootstrapper-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015 PlaceAVote
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
