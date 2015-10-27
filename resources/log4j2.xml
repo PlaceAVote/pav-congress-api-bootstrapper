@@ -4,16 +4,23 @@
         <Console name="Console-Clojure" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level ns:%logger{36} - %msg%n"/>
         </Console>
+        <File name="SyncLog" fileName="log/app.log">
+            <PatternLayout>
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level ns:%logger{36} - %msg%n"/>
+            </PatternLayout>
+        </File>
     </Appenders>
 
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="Console-Clojure"/>
+            <AppenderRef ref="SyncLog"/>
         </Root>
 
         <!-- CLOJURE LOGGERS -->
         <Logger name="main" level="INFO" additivity="false">
             <AppenderRef ref="Console-Clojure"/>
+            <AppenderRef ref="SyncLog"/>
         </Logger>
 
         <!-- JAVA LOGGERS -->

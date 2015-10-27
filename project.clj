@@ -9,10 +9,8 @@
                  [clojurewerkz/elastisch "2.1.0"]
                  [clj-aws-s3 "0.3.10"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [log4j/log4j "1.2.17" :exclusions [javax.mail/mail
-                                                    javax.jms/jms
-                                                    com.sun.jdmk/jmxtools
-                                                    com.sun.jmx/jmxri]]
+                 [org.apache.logging.log4j/log4j-slf4j-impl "2.0.2"]
+                 [org.apache.logging.log4j/log4j-core "2.0.2"]
                  [cheshire "5.5.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [clojurewerkz/quartzite "2.0.0"]]
