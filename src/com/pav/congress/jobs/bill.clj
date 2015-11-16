@@ -5,10 +5,10 @@
             [com.pav.congress.bill.bill :refer [persist-bills]]
             [clojure.core.async :refer [timeout chan alts!! >!! go-loop]]))
 
-(defn drained? [map]
-  (if (contains? map :drained)
-    true
-    false))
+(defn- drained?
+  "Check if map has :drained key."
+  [map]
+  (contains? map :drained))
 
 (defn batch-and-persist [connection channel batch-size promise]
   (go-loop []
@@ -18,17 +18,19 @@
                             (let [result (first (alts!! [channel timeout-chan] :priority true))]
                               result)))
                      (remove (comp nil?)))]
-      (if (drained? (last batch))
+      (if (-> batch last drained?)
         (do (persist-bills connection (filter #(not (contains? % :drained)) batch))
             (deliver promise true))
         (do
-          (if-not (empty? batch)
+          (when-not (empty? batch)
             (persist-bills connection batch))
-            (recur))))))
+          (recur))))))
 
-(defn filter-json-keys [object-map]
+(defn- filter-json-keys
+  "Make sure :key element in map ends with 'data.json'."
+  [object-map]
   (let [key (:key object-map)]
-    (if-not (nil? (re-find (re-pattern #"data.json") key))
+    (if (re-find #"/data.json$" key)
       key)))
 
 (defn gather-all-keys-for [cred keys bucket prefix marker truncated? delimiter]
