@@ -61,11 +61,11 @@ filling elasticsearch instance."
 
     ;; Read specific files from S3 and fill es. This could be refactored, but the code
     ;; is short anyways.
-    #_(->> [:legislator-bucket :legislator-prefix :socialmedia-prefix]
+    (->> [:legislator-bucket :legislator-prefix :socialmedia-prefix]
          (select-keys env)
          (sync-legislators es-connection creds))
 
-    #_(->> [:legislator-bucket :committees-prefix :committee-members]
+    (->> [:legislator-bucket :committees-prefix :committee-members]
          (select-keys env)
          (sync-committees es-connection creds))
 
@@ -75,7 +75,7 @@ filling elasticsearch instance."
 
 (defjob SyncJob [ctx]
   (try
-    (start-rsync-script)
+    ;(start-rsync-script)
     (start-sync-job)
     (catch Exception e
       ;; log error so we can know if something happened with es or s3 connection
