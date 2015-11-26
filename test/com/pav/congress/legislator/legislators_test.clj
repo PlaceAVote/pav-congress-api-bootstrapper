@@ -5,10 +5,8 @@
                                                   legislators-social-media
                                                   connection]]
             [clojurewerkz.elastisch.rest.document :as esd]
-            [com.pav.congress.legislator.legislator :refer [persist-legislators]]
+            [com.pav.congress.legislator.legislator :refer [persist-legislators photo-bucket-url]]
             [environ.core :refer [env]]))
-
-(def photo-bucket-url (:photo-bucket-url env))
 
 (against-background [(before :facts (clean-congress-index))]
   (facts "Test cases cover processing legislator information from various yaml files, parsing and persisting them

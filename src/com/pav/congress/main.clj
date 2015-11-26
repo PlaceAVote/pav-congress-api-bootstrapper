@@ -32,7 +32,7 @@ to 'logger' facility. It is macro mainly to handle macro-like arguments like 'lo
 logging functions. Returns only exit-code."
   [cmd]
   (let [proc      (. (Runtime/getRuntime) exec cmd)
-        as-reader #(BufferedReader. (InputStreamReader. %))]
+        as-reader #(-> % InputStreamReader. BufferedReader.)]
     (with-open [stdout (-> proc .getInputStream as-reader)
                 stderr (-> proc .getErrorStream as-reader)]
       (let [out (future (stream-looper stdout log/info))
@@ -53,23 +53,25 @@ filling elasticsearch instance."
   []
   (let [es-url (:es-url env)
         es-connection (connect es-url)
+        redis-url {:spec {:uri (:redis-url env)}}
+        es-redis-connection [es-url :redis redis-url]
         creds (select-keys env [:access-key :secret-key])]
     (log/infof "Connecting to ElasticSearch at %s..." es-url)
-    (eri/update-mapping es-connection "congress" "bill" (slurp "resources/mappings/mappings.json"))
+    ;(eri/update-mapping es-connection "congress" "bill" (slurp "resources/mappings/mappings.json"))
 
     ;; Read specific files from S3 and fill es. This could be refactored, but the code
     ;; is short anyways.
-    (->> [:legislator-bucket :legislator-prefix :socialmedia-prefix]
+    #_(->> [:legislator-bucket :legislator-prefix :socialmedia-prefix]
          (select-keys env)
          (sync-legislators es-connection creds))
 
-    (->> [:legislator-bucket :committees-prefix :committee-members]
+    #_(->> [:legislator-bucket :committees-prefix :committee-members]
          (select-keys env)
          (sync-committees es-connection creds))
 
     (->> [:legislator-bucket :bills-prefix]
          (select-keys env)
-         (sync-bills es-connection creds))))
+         (sync-bills es-redis-connection creds))))
 
 (defjob SyncJob [ctx]
   (try

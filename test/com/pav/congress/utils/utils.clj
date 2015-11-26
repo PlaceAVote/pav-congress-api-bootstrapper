@@ -2,6 +2,7 @@
   (:require [clojurewerkz.elastisch.rest :refer [connect]]
             [clojurewerkz.elastisch.rest.index :refer [create delete]]
             [clj-yaml.core :refer [parse-string]]
+            [clojure.tools.logging :as log]
             [cheshire.core :as ch]))
 
 (def connection (connect))
@@ -15,6 +16,8 @@
 (def bills [(ch/parse-string (slurp "test-resources/bills/hr/hr2/data.json") true)])
 
 (defn clean-congress-index []
+  (log/info "Dropping congress index...")
   (delete connection "congress")
+  (log/info "Loading congress mapping...")
   (println congress-mapping)
   (create connection "congress" :mappings congress-mapping))

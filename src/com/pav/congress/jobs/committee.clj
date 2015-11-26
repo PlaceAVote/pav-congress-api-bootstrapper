@@ -5,10 +5,16 @@
             [clojure.tools.logging :as log]))
 
 (defn parse-s3-yaml-file
-  "Parse yaml file found on S3"
+  "Parse yaml file found on S3."
   [object]
   ;; TODO: this should go to utils
   (-> object :content slurp parse-string))
+
+(defn parse-yaml-file
+  "Parse yaml file found on fs."
+  ;; TODO: this should go to utils
+  [object]
+  (-> object slurp parse-string))
 
 (defn sync-committees
   "Synchronize comittees by reading data from S3."
