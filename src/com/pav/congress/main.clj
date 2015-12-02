@@ -73,25 +73,34 @@ filling elasticsearch instance."
          (select-keys env)
          (sync-bills es-redis-connection creds))))
 
-(defjob SyncJob [ctx]
+(defn- run-all
+  "Run everything."
+  []
   (try
-    ;(start-rsync-script)
+    (start-rsync-script)
     (start-sync-job)
     (catch Exception e
       ;; log error so we can know if something happened with es or s3 connection
       (log/error e "Sync job failed:"))))
 
+(defjob SyncJob [ctx]
+  (run-all))
+
 (defn -main
   "Main application entry point."
   [& args]
-  (let [s   (-> (qs/initialize) qs/start)
-        job  (j/build
-               (j/of-type SyncJob)
-               (j/with-identity (j/key "jobs.noop.1")))
-        now-trigger (t/build
-                      (t/with-identity (t/key "triggers.1"))
-                      (t/with-schedule (schedule
+  (if (= "now" (first args))
+    (do
+      (log/info "Running sync now")
+      (run-all))
+    (let [s   (-> (qs/initialize) qs/start)
+          job  (j/build
+                (j/of-type SyncJob)
+                (j/with-identity (j/key "jobs.noop.1")))
+          now-trigger (t/build
+                       (t/with-identity (t/key "triggers.1"))
+                       (t/with-schedule (schedule
                                          (with-interval-in-hours 5))))]
-    (log/info "Waiting for job to run")
-    (qs/schedule s job now-trigger)
-    (log/info "Finished job")))
+      (log/info "Waiting for job to run")
+      (qs/schedule s job now-trigger)
+      (log/info "Finished job"))))
