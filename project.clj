@@ -19,7 +19,8 @@
   :main com.pav.congress.main
   :javac-options ["-target" "1.8" "-source" "1.8"]
   :resource-paths ["resources"]
-  :profiles {:uberjar {:aot :all
+  :profiles {:jvm-opts ^:replace ["-Xms256m" "-Xmx512m" "-Xss512k" "-XX:MaxMetaspaceSize=150m"]
+             :uberjar {:aot :all
                        :uberjar-name "pav-congress-api-bootstrapper.jar"}
              :dev {
                    :dependencies [[midje "1.7.0"]]
