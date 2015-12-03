@@ -5,12 +5,12 @@
             [com.pav.congress.bill.bill :refer [persist-bills]]
             [clojure.core.async :refer [timeout chan alts!! >!! go-loop]]))
 
-(defn drained? [map]
-  (if (contains? map :drained)
-    true
-    false))
+(defn- drained?
+  "Check if map has :drained key."
+  [map]
+  (contains? map :drained))
 
-(defn batch-and-persist [connection channel batch-size promise]
+(defn batch-and-persist [connections channel batch-size promise]
   (go-loop []
     (let [timeout-chan (timeout 5000)
           batch (->> (range batch-size)
@@ -18,17 +18,19 @@
                             (let [result (first (alts!! [channel timeout-chan] :priority true))]
                               result)))
                      (remove (comp nil?)))]
-      (if (drained? (last batch))
-        (do (persist-bills connection (filter #(not (contains? % :drained)) batch))
+      (if (-> batch last drained?)
+        (do (persist-bills connections (filter #(not (contains? % :drained)) batch))
             (deliver promise true))
         (do
-          (if-not (empty? batch)
-            (persist-bills connection batch))
-            (recur))))))
+          (when-not (empty? batch)
+            (persist-bills connections batch))
+          (recur))))))
 
-(defn filter-json-keys [object-map]
+(defn- filter-json-keys
+  "Make sure :key element in map ends with 'data.json'."
+  [object-map]
   (let [key (:key object-map)]
-    (if-not (nil? (re-find (re-pattern #"data.json") key))
+    (if (re-find #"/data.json$" key)
       key)))
 
 (defn gather-all-keys-for [cred keys bucket prefix marker truncated? delimiter]
@@ -47,12 +49,13 @@
     (do (log/info "Finished gathering Bill keys from s3")
         (conj keys :finished))))
 
-(defn sync-bills [es-connection cred s3-info]
+(defn sync-bills [connections redis-url cred s3-info]
   (log/info "Started Syncing Bills")
   (let [promise (promise)
         channel (chan 1024)
-        _ (batch-and-persist es-connection channel 100 promise)
+        _ (batch-and-persist connections channel 100 promise)
         keys (->> (gather-all-keys-for cred [] (:legislator-bucket s3-info) (:bills-prefix s3-info) nil true nil)
+                  ;; TODO: move (complement nil?) to own name (e.g. 'not-nil?' fn)
                   (filterv (complement nil?)))]
     (doseq [key keys]
       (log/info (str "Reading Bill " key))

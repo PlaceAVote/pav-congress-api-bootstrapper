@@ -1,32 +1,33 @@
 (defproject pav-congress-api-bootstrapper "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :description "PlaceAVote bills parser and indexer"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [environ "1.0.0"]
                  [clj-yaml "0.4.0"]
                  [clojurewerkz/elastisch "2.1.0"]
-                 [clj-aws-s3 "0.3.10"]
+                 [clj-aws-s3 "0.3.10" :exclusions [joda-time]] ;; prevent version range mismatch
+                 [joda-time "2.8.2"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.apache.logging.log4j/log4j-slf4j-impl "2.0.2"]
                  [org.apache.logging.log4j/log4j-core "2.0.2"]
                  [cheshire "5.5.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [clojurewerkz/quartzite "2.0.0"]]
+                 [clojurewerkz/quartzite "2.0.0"]
+                 [com.taoensso/carmine "2.12.0" :exclusions [org.clojure/tools.reader]]
+                 [clojure-msgpack "1.1.2"]]
   :plugins [[lein-environ "1.0.0"]]
   :target-path "target/%s"
   :main com.pav.congress.main
-  :min-lein-version "2.0.0"
   :javac-options ["-target" "1.8" "-source" "1.8"]
   :resource-paths ["resources"]
-  :profiles {:uberjar {:aot :all
+  :profiles {:jvm-opts ^:replace ["-Xms256m" "-Xmx512m" "-Xss512k" "-XX:MaxMetaspaceSize=150m"]
+             :uberjar {:aot :all
                        :uberjar-name "pav-congress-api-bootstrapper.jar"}
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
                    :env {:access-key "REPLACE_HERE"
                          :secret-key "REPLACE_HERE"
+                         :sync-script "./bin/data-sync.sh"
                          :legislator-bucket "congress-bulk-data"
                          :legislator-prefix "congress-legislators/legislators-current.yaml"
                          :socialmedia-prefix "congress-legislators/legislators-social-media.yaml"
@@ -34,4 +35,5 @@
                          :committee-members "congress-legislators/committee-membership-current.yaml"
                          :bills-prefix "congress/114/bills/"
                          :photo-bucket-url "https://s3-us-west-2.amazonaws.com/congress-bulk-data/photos"
-                         :es-url "http://localhost:9200"}}})
+                         :es-url "http://localhost:9200"
+                         :redis-url "redis://127.0.0.1:6379"}}})
