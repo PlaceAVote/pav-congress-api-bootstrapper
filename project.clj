@@ -25,8 +25,8 @@
              :dev {
                    :dependencies [[midje "1.7.0"]]
                    :plugins [[lein-midje "3.1.3"]]
-                   :env {:access-key "REPLACE_HERE"
-                         :secret-key "REPLACE_HERE"
+                   :env {:access-key "AKIAJPQP6GFOO2N7YCXA"
+                         :secret-key "QL4wfB7xaq6kPMG/1FPxn8yHHTP2YMrtyUWVYPAw"
                          :sync-script "./bin/data-sync.sh"
                          :legislator-bucket "congress-bulk-data"
                          :legislator-prefix "congress-legislators/legislators-current.yaml"
