@@ -49,7 +49,7 @@
     (do (log/info "Finished gathering Bill keys from s3")
         (conj keys :finished))))
 
-(defn sync-bills [connections redis-url cred s3-info]
+(defn sync-bills [connections cred s3-info]
   (log/info "Started Syncing Bills")
   (let [promise (promise)
         channel (chan 1024)
