@@ -54,7 +54,7 @@ filling elasticsearch instance."
   (let [es-url (:es-url env)
         es-connection (connect es-url)
         redis-url {:spec {:uri (:redis-url env)}}
-        es-redis-connection [es-url :redis redis-url]
+        es-redis-connection [es-connection :redis redis-url]
         creds (select-keys env [:access-key :secret-key])]
     (log/infof "Connecting to ElasticSearch at %s..." es-url)
     ;(eri/update-mapping es-connection "congress" "bill" (slurp "resources/mappings/mappings.json"))
