@@ -34,7 +34,7 @@
       key)))
 
 (defn gather-all-keys-for [cred keys bucket prefix marker truncated? delimiter]
-  (log/info "Gathering Bill Keys from s3")
+  (log/info "Gathering Bill Keys from s3 folder " prefix)
   (if truncated?
     (let [{objects :objects
            next-marker :next-marker
