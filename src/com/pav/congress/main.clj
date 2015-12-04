@@ -100,7 +100,7 @@ filling elasticsearch instance."
           now-trigger (t/build
                        (t/with-identity (t/key "triggers.1"))
                        (t/with-schedule (schedule
-                                         (with-interval-in-hours 5))))]
+                                         (with-interval-in-hours 12))))]
       (log/info "Waiting for job to run")
       (qs/schedule s job now-trigger)
       (log/info "Finished job"))))
