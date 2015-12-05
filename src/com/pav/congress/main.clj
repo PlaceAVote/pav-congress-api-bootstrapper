@@ -77,7 +77,7 @@ filling elasticsearch instance."
   "Run everything."
   []
   (try
-    ;(start-rsync-script)
+    (start-rsync-script)
     (start-sync-job)
     (catch Exception e
       ;; log error so we can know if something happened with es or s3 connection
