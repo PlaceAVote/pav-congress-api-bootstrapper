@@ -19,7 +19,8 @@
 (defn- construct-img-url-paths
   "Add image paths, constructed from legislators govtrack id."
   [legislator]
-  (let [govtrack_id (:govtrack legislator)]
+  (let [govtrack_id (:govtrack legislator)
+				photo-bucket-url (:photo-bucket-url env)]
     (assoc legislator :img_urls {:200px (str photo-bucket-url "/" govtrack_id "-200px.jpeg")
                                  :100px (str photo-bucket-url "/" govtrack_id "-100px.jpeg")
                                  :50px (str photo-bucket-url "/" govtrack_id "-50px.jpeg")})))
