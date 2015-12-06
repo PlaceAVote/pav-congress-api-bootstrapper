@@ -114,7 +114,7 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :last_action last-action)
         (assoc :urls (get-urls bill))
         (assoc :last_vote last-vote)
-        (assoc :summary (get-in bill [:summary :text]))
+        (assoc :summary (clojure.string/replace (get-in bill [:summary :text]) #"\n" "<br />"))
         (assoc :keywords (get-in bill [:subjects]))
         (assoc :votes vote-actions))))
 
