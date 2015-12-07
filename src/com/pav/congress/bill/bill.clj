@@ -81,6 +81,11 @@ the second a map of differences found in second bill. If no differences found, r
        :govtrack (str "https://www.govtrack.us/congress/bills/" congress "/" type number)
        :opencongress (str "https://www.opencongress.org/bill/" bill_id)})))
 
+(defn prepare-bill-summary [summary]
+	(if summary
+		(clojure.string/replace summary #"\n" "<br />")
+		"No Summary Present..."))
+
 (defn- filter-votes-from-actions
   "Scan vector of maps and return only those with 'vote' type."
   [actions]
@@ -114,7 +119,7 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :last_action last-action)
         (assoc :urls (get-urls bill))
         (assoc :last_vote last-vote)
-        (assoc :summary (clojure.string/replace (get-in bill [:summary :text]) #"\n" "<br />"))
+        (assoc :summary (prepare-bill-summary (get-in bill [:summary :text])))
         (assoc :keywords (get-in bill [:subjects]))
         (assoc :votes vote-actions))))
 
