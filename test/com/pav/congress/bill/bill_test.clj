@@ -162,7 +162,19 @@
                                              :text       "Passed Senate without amendment by Yea-Nay Vote. 92 - 8. Record Vote Number: 144."
                                              :type       "vote"
                                              :vote_type  "vote2"
-                                             :where      "s"}]})))
+                                             :where      "s"}]}))
+
+	(fact "Given a collection of bills, verify hr1764 subject term is politics"
+		(let [_ (Thread/sleep 1000)
+					_ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills)
+					{politics :subject} (:_source (esd/get connection "congress" "bill" "hr1764-114"))
+					{defense :subject} (:_source (esd/get connection "congress" "bill" "hr4127-114"))
+					{technology :subject} (:_source (esd/get connection "congress" "bill" "hr2669-114"))
+					{drugs :subject} 		(:_source (esd/get connection "congress" "bill" "s32-114"))]
+			politics => "politics"
+			drugs => "drugs, gun rights"
+			defense => "defense"
+			technology => "technology")))
 
 (facts "Test various bill handling utility functions"
   (fact "Validate next logical bill state"

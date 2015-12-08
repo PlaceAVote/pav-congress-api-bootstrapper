@@ -13,7 +13,11 @@
 (def committees (parse-string (slurp "test-resources/congress-legislators/committees-current.yaml") true))
 (def committee-members (parse-string (slurp "test-resources/congress-legislators/committee-membership-current.yaml") true))
 
-(def bills [(ch/parse-string (slurp "test-resources/bills/hr/hr2/data.json") true)])
+(def bills [(ch/parse-string (slurp "test-resources/bills/hr/hr2/data.json") true)
+            (ch/parse-string (slurp "test-resources/bills/hr/hr1764/data.json") true)
+            (ch/parse-string (slurp "test-resources/bills/hr/hr4127/data.json") true)
+            (ch/parse-string (slurp "test-resources/bills/hr/hr2669/data.json") true)
+						(ch/parse-string (slurp "test-resources/bills/s/s32/data.json") true)])
 
 (defn clean-congress-index []
   (log/info "Dropping congress index...")

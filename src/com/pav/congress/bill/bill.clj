@@ -9,7 +9,8 @@
             msgpack.clojure-extensions
             [clojure.tools.logging :as log]
             [clojure.data :as d]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.pprint :refer [pprint]]
+						[clojure.string :refer [lower-case]]))
 
 ;; FIXME: to utils file
 (defn- pprint-str
@@ -91,6 +92,19 @@ the second a map of differences found in second bill. If no differences found, r
   [actions]
   (filterv #(= "vote" (:type %)) actions))
 
+(defn retrieve-subject
+	"For subjects that match onboarding subjects, mark them with those subject names"
+	[subject]
+	(case (lower-case subject)
+		"arts, culture, religion" "religion"
+		"government operations and politics" "politics"
+		"crime and law enforcement" "drugs, gun rights"
+		"armed forces and national security" "defense"
+		"science, technology, communications" "technology"
+		"economics and public finance" "economics"
+		"social welfare" "social issues"
+		subject))
+
 (defn- cleanse-bill
   "Get only interested bits from parsed bill body."
   [bill]
@@ -107,7 +121,7 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :last_action_at (:acted_at last-action))
         (assoc :last_vote_at (:acted_at last-vote))
         (assoc :updated_at (get-in bill [:updated_at]))
-        (assoc :subject (get-in bill [:subjects_top_term]))
+        (assoc :subject (retrieve-subject (get-in bill [:subjects_top_term])))
         (assoc :short_title (get-in bill [:short_title]))
         (assoc :official_title (get-in bill [:official_title]))
         (assoc :status (get-in bill [:status]))
