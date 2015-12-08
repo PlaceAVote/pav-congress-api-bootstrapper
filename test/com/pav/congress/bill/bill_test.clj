@@ -164,7 +164,7 @@
                                              :vote_type  "vote2"
                                              :where      "s"}]}))
 
-	(fact "Given a collection of bills, verify hr1764 subject term is politics"
+	(future-fact "Given a collection of bills, verify hr1764 subject term is politics"
 		(let [_ (Thread/sleep 1000)
 					_ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills)
 					{politics :subject} (:_source (esd/get connection "congress" "bill" "hr1764-114"))
