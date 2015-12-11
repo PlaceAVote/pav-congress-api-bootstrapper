@@ -10,7 +10,7 @@
             [clojure.tools.logging :as log]
             [clojure.data :as d]
             [clojure.pprint :refer [pprint]]
-						[clojure.string :refer [lower-case]]))
+            [clojure.string :refer [lower-case]]))
 
 ;; FIXME: to utils file
 (defn- pprint-str
@@ -141,7 +141,7 @@ the second a map of differences found in second bill. If no differences found, r
   "Lookup for bill details in ES and (in case of multiple results), return only
 first one. Returns nil if not found."
   [connection id]
-  (let [results (erd/search connection "congress" "bill" :query (q/term :bill_id id))
+  (let [results (erd/search connection "congress" "bill" :query (q/term :_id id))
         n       (ersp/total-hits results)]
     (when-not (= n 0)
       (when (> n 1)
@@ -207,25 +207,11 @@ Redis if does. Also, if document is updated, update ES index too."
   (doseq [b bills]
     (index-bill! connections b)))
 
-;(defn- cleanse-bills [bills]
-;  (map cleanse-bill bills))
-;
-;(defn persist-bills
-;  "Store all bills in ES instance."
-;  [connection bills]
-;  (let [cleansed-bills (cleanse-bills bills)
-;        bills-with-ids (map apply-id cleansed-bills)
-;        bulk-payload (esrb/bulk-index bills-with-ids)]
-;    (log/info (str "Persisting " (count bulk-payload) " Bills to Elasticsearch"))
-;    (esrb/bulk-with-index-and-type connection "congress" "bill" bulk-payload)))
-
 (comment
   (-> (r/connect "http://127.0.0.1:9200")
       (find-bill "hconres11-114")
       :status
       clojure.pprint/pprint)
-
-  (def SAMPLE {:votes [], :urls {:congress "http://beta.congress.gov/bill/114th/house-concurrent-resolution/11", :govtrack "https://www.govtrack.us/congress/bills/114/hconres11", :opencongress "https://www.opencongress.org/bill/hconres11-114"}, :bill_id "hconres111234-114", :last_action_at "2015-01-30", :number "11", :short_title nil, :history {:active false, :awaiting_signature false, :enacted false, :vetoed false}, :congress "114", :keywords ["blood and blood diseases" "Commemorative events and holidays" "Congressional tributes" "Health" "Organ and tissue donation and transplantation" "Social work, volunteer service, charitable organizations"], :summary "Supports the designation of National Blood Donor Month.\n\nAcknowledges the important role of volunteer blood donors in protecting the health and emergency preparedness of the United States.\n\nRecognizes the need to promote a safe, stable blood supply and to increase volunteer participation of blood donors.\n\nEndorses efforts to update blood donation policies in a safe and scientifically sound manner.\n\nRecognizes the roles of America's Blood Centers, AABB, and the American Red Cross in ensuring the safety of the blood supply and delivering lifesaving blood and blood products to health providers and patients.", :updated_at "2015-11-14T06:54:36-05:00", :bill_type "hconres", :last_vote nil, :status "REFERRED", :official_title "Expressing support for designation of January 2015 as \"National Blood Donor Month\".", :related_bill_id ["sres56-114"], :last_action {:acted_at "2015-01-30", :in_committee nil, :references [], :text "Referred to the Subcommittee on Health.", :type "referral"}, :introduced_at "2015-01-28", :sponsor_id "01967", :cosponsors_count 2, :subject "Health", :last_vote_at nil, :sponsor {:district "5", :name "Quigley, Mike", :state "IL", :thomas_id "01967", :title "Rep", :type "person"}})
 
   (-> (r/connect "http://127.0.0.1:9200")
       (find-bill "hconres111234-114"))
