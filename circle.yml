@@ -2,7 +2,6 @@ machine:
   pre:
     - curl -Ls https://install.convox.com/linux.zip > /tmp/convox.zip
     - sudo unzip /tmp/convox.zip -d /usr/local/bin
-    - convox login convox-pav-dev-629155429.us-east-1.elb.amazonaws.com --password DjJRSfKPKmAsZRlEsjDNDNCxBCjNtQ
   java:
     version: oraclejdk8
   services:
@@ -12,4 +11,13 @@ deployment:
     branch: master
     commands:
       - lein uberjar
+      - convox login $CONVOX_GRID_HOST --password $CONVOX_API_KEY
+      - convox switch development
+      - convox deploy
+  release:
+    tag: /v[0-9]+(\.[0-9]+)*/
+    commands:
+      - lein uberjar
+      - convox login $CONVOX_GRID_HOST --password $CONVOX_API_KEY
+      - convox switch production
       - convox deploy
