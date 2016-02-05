@@ -1,4 +1,4 @@
-(defproject pav-congress-api-bootstrapper "0.1.3-SNAPSHOT"
+(defproject pav-congress-api-bootstrapper "0.1.3"
   :description "PlaceAVote bills parser and indexer"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [environ "1.0.0"]
