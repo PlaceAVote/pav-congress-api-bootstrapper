@@ -192,7 +192,7 @@ Redis if does. Also, if document is updated, update ES index too."
                      (car/publish "pav-congress-api-bootstrapper")
                      (wcar redis-conn))
                 (catch Exception e
-                  (log/error e "Failed ending message to Redis"))))
+                  (log/error e "Sending bill status message to Redis failed"))))
             ;; update bill
             (log/infof "Updating bill '%s'..." id)
             (erd/replace es-conn "congress" "bill" id prepared-bill))))
@@ -211,6 +211,11 @@ Redis if does. Also, if document is updated, update ES index too."
   (-> (r/connect "http://127.0.0.1:9200")
       (find-bill "hconres11-114")
       :status
+      clojure.pprint/pprint)
+
+  (-> (r/connect "https://search-pav-elastic-ewkjqgqpzlamhgsy5b6mokc4te.us-west-2.es.amazonaws.com/")
+      ;(find-bill "hconres11-114")
+      (erd/search "congress" "bill" :query (q/term :_status "REFERRED"))
       clojure.pprint/pprint)
 
   (-> (r/connect "http://127.0.0.1:9200")
