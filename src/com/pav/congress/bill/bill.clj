@@ -9,15 +9,8 @@
             msgpack.clojure-extensions
             [clojure.tools.logging :as log]
             [clojure.data :as d]
-            [clojure.pprint :refer [pprint]]
-            [clojure.string :refer [lower-case]]))
-
-;; FIXME: to utils file
-(defn- pprint-str
-  "Pretty print to string."
-  [obj]
-  (with-out-str
-    (pprint obj)))
+            [clojure.string :refer [lower-case]]
+            [com.pav.congress.utils :refer [pprint-str]]))
 
 (defn- apply-id
   "Add _id key to have the same value as bill_id. This is necessary as some ES actions
