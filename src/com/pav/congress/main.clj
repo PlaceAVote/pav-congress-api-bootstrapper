@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [com.pav.congress.jobs.legislator :refer [sync-legislators]]
             [com.pav.congress.jobs.committee :refer [sync-committees]]
-            [com.pav.congress.jobs.bill :refer [sync-bills]]
+            [com.pav.congress.jobs.bill :refer [sync-bills sync-billmetadata]]
             [environ.core :refer [env]]
             [clojurewerkz.elastisch.rest :refer [connect]]
             [clojure.tools.logging :as log]
@@ -13,7 +13,8 @@
             [clojurewerkz.quartzite.triggers :as t]
             [clojurewerkz.quartzite.schedule.daily-interval :refer [schedule
                                                                     with-interval-in-hours]]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clojure.tools.cli :as cli])
   (:import java.lang.Runtime
            [java.io InputStreamReader BufferedReader]))
 
@@ -73,6 +74,15 @@ filling elasticsearch instance."
          (select-keys env)
          (sync-bills es-redis-connection creds))))
 
+(defn- start-billmetadata-sync-job
+  "Sync bill meta data from file or s3 resource"
+  [bucket prefix]
+  (let [es-url (:es-url env)
+        es-connection (connect es-url)
+        creds (select-keys env [:access-key :secret-key])]
+    (log/infof "Connecting to ElasticSearch at %s..." es-url)
+    (sync-billmetadata es-connection creds bucket prefix)))
+
 (defn- run-all
   "Run everything."
   []
@@ -86,21 +96,62 @@ filling elasticsearch instance."
 (defjob SyncJob [ctx]
   (run-all))
 
+(defn init-quartz-job []
+  (let [s   (-> (qs/initialize) qs/start)
+        job  (j/build
+               (j/of-type SyncJob)
+               (j/with-identity (j/key "jobs.noop.1")))
+        now-trigger (t/build
+                      (t/with-identity (t/key "triggers.1"))
+                      (t/with-schedule (schedule
+                                         (with-interval-in-hours 12))))]
+    (log/info "Waiting for job to run")
+    (qs/schedule s job now-trigger)
+    (log/info "Finished job")))
+
+(def cli-opts
+  [["-h" "--help" "Print Help"]
+   [nil "--run-job" "Run Bootstrapper Job" :default false :flag true]
+   [nil "--schedule-job" "Schedule Bootstrapper Job" :default false :flag true]
+   [nil "--sync-billmetadata" "Sync Bill Metadata from File" :default false :flag true]])
+
+(defn usage [options-summary]
+  (->> ["Congress Bootstrapper Usage."
+        ""
+        "Usage: program-name [options] action"
+        ""
+        "Options:"
+        options-summary
+        ""
+        "Actions:"
+        "  --run-job             Run Bootstrapper Job"
+        "  --schedule-job        Schedule Bootstrapper Job"
+        "  --sync-billmetadata   Sync bill meta data from file"
+        ""
+        "Please refer to the manual page for more information."]
+    (clojure.string/join \newline)))
+
+(defn exit [status msg]
+  (println msg)
+  (System/exit status))
+
+(defn error [status msg]
+  (log/error msg)
+  (System/exit status))
+
 (defn -main
   "Main application entry point."
   [& args]
-  (if (= "now" (first args))
-    (do
-      (log/info "Running sync now")
+  (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-opts)]
+    (when errors
+      (error 1 errors))
+    (when (:help options)
+      (exit 0 (usage summary)))
+    (when (true? (:run-job options))
+      (log/info "Running Bootstrapper Job Now")
       (run-all))
-    (let [s   (-> (qs/initialize) qs/start)
-          job  (j/build
-                (j/of-type SyncJob)
-                (j/with-identity (j/key "jobs.noop.1")))
-          now-trigger (t/build
-                       (t/with-identity (t/key "triggers.1"))
-                       (t/with-schedule (schedule
-                                         (with-interval-in-hours 12))))]
-      (log/info "Waiting for job to run")
-      (qs/schedule s job now-trigger)
-      (log/info "Finished job"))))
+    (when (true? (:schedule-job options))
+      (log/info "Scheduling Bootstrapper Job Now")
+      (init-quartz-job))
+    (when (:sync-billmetadata options)
+      (start-billmetadata-sync-job (:bill-metadata-bucket env) (:bill-metadata-prefix env)))))

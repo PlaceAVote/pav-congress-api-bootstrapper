@@ -13,7 +13,9 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [com.taoensso/carmine "2.12.0" :exclusions [org.clojure/tools.reader]]
-                 [clojure-msgpack "1.1.2"]]
+                 [clojure-msgpack "1.1.2"]
+                 [org.clojure/tools.cli "0.3.3"]
+                 [org.clojure/data.csv "0.1.3"]]
   :plugins [[lein-environ "1.0.0"]
 						[lein-release "1.0.5"]]
   :lein-release {:scm :git
@@ -40,4 +42,6 @@
                          :bills-prefix "congress/114/bills/"
                          :photo-bucket-url "https://s3-us-west-2.amazonaws.com/congress-bulk-data/photos"
                          :es-url "http://localhost:9200"
-                         :redis-url "redis://127.0.0.1:6379"}}})
+                         :redis-url "redis://127.0.0.1:6379"
+                         :bill-metadata-bucket "congress-metadata"
+                         :bill-metadata-prefix "bills/bill-metadata.csv"}}})

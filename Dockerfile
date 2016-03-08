@@ -20,4 +20,4 @@ COPY resources /app/resources
 
 COPY target/uberjar/pav-congress-api-bootstrapper.jar pav-congress-api-bootstrapper.jar
 
-CMD java -jar pav-congress-api-bootstrapper.jar
+CMD java -jar pav-congress-api-bootstrapper.jar --schedule-job

@@ -2,8 +2,10 @@
   (:require [aws.sdk.s3 :as s3]
             [cheshire.core :as ch]
             [clojure.tools.logging :as log]
-            [com.pav.congress.bill.bill :refer [persist-bills]]
-            [clojure.core.async :refer [timeout chan alts!! >!! go-loop]]))
+            [com.pav.congress.bill.bill :refer [persist-bills persist-billmetadata]]
+            [clojure.core.async :refer [timeout chan alts!! >!! go-loop]]
+            [clojure.java.io :as io]
+            [clojure.data.csv :as csv]))
 
 (defn- drained?
   "Check if map has :drained key."
@@ -64,3 +66,16 @@
         (>!! channel (ch/parse-string (slurp (:content (s3/get-object cred (:legislator-bucket s3-info) key))) true))))
     @promise
     (log/info "Finished Syncing Bills")))
+
+(defn- read-s3-file
+  "Read File from bucket with prefix"
+  [bucket prefix cred]
+  (:content (s3/get-object cred bucket prefix)))
+
+(defn sync-billmetadata [es-connection cred bucket prefix]
+  (let [file-contents (csv/read-csv (slurp (read-s3-file bucket prefix cred)))
+        keys (map keyword (first file-contents))
+        metadata (->> (map #(zipmap keys %) (rest file-contents))
+                   (map #(assoc % :_id (str (:bill_id %) "-" (:congress %)))))]
+    (log/info "Persisting " (count metadata) " Bill Metadata Entries")
+    (persist-billmetadata es-connection metadata)))

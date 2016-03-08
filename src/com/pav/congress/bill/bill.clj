@@ -148,6 +148,11 @@ first one. Returns nil if not found."
   [b]
   (cleanse-bill b))
 
+(defn- index-billmetadata
+  "Index bill metadata under type billmeta"
+  [connection b]
+  (esrb/bulk-with-index-and-type connection "congress" "billmeta" (esrb/bulk-index b)))
+
 (defn- index-bill!
   "Index bill. Before actual putting the document inside ES index,
 check if the bill already exists and does have updated/changed values, firing up event on
@@ -199,6 +204,11 @@ Redis if does. Also, if document is updated, update ES index too."
   [connections bills]
   (doseq [b bills]
     (index-bill! connections b)))
+
+(defn persist-billmetadata
+  "Store all bill metadata in ES instance"
+  [connection b]
+  (index-billmetadata connection b))
 
 (comment
   (-> (r/connect "http://127.0.0.1:9200")
