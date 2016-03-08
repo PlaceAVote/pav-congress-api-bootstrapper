@@ -98,6 +98,12 @@ the second a map of differences found in second bill. If no differences found, r
 		"social welfare" "social issues"
 		subject))
 
+(defn apply-bill-id
+  "Assoc bill_id with :_id field"
+  [bill]
+  (assoc bill :_id (str (:bill_id %) "-" (:congress %))
+              :bill_id (str (:bill_id %) "-" (:congress %))))
+
 (defn- cleanse-bill
   "Get only interested bits from parsed bill body."
   [bill]
