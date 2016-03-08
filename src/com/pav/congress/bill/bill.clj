@@ -101,8 +101,8 @@ the second a map of differences found in second bill. If no differences found, r
 (defn apply-bill-id
   "Assoc bill_id with :_id field"
   [bill]
-  (assoc bill :_id (str (:bill_id %) "-" (:congress %))
-              :bill_id (str (:bill_id %) "-" (:congress %))))
+  (assoc bill :_id (str (:bill_id bill) "-" (:congress %))
+              :bill_id (str (:bill_id bill) "-" (:congress %))))
 
 (defn- cleanse-bill
   "Get only interested bits from parsed bill body."
