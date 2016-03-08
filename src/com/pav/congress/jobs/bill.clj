@@ -76,6 +76,7 @@
   (let [file-contents (csv/read-csv (slurp (read-s3-file bucket prefix cred)))
         keys (map keyword (first file-contents))
         metadata (->> (map #(zipmap keys %) (rest file-contents))
-                   (map #(assoc % :_id (str (:bill_id %) "-" (:congress %)))))]
+                   (map #(assoc % :_id (str (:bill_id %) "-" (:congress %))
+                                  :bill_id (str (:bill_id %) "-" (:congress %)))))]
     (log/info "Persisting " (count metadata) " Bill Metadata Entries")
     (persist-billmetadata es-connection metadata)))
