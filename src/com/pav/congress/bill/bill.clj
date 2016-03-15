@@ -104,9 +104,20 @@ the second a map of differences found in second bill. If no differences found, r
   (assoc bill :_id (str (:bill_id bill) "-" (:congress bill))
               :bill_id (str (:bill_id bill) "-" (:congress bill))))
 
+(defn party-affiliation-count
+  "Unfortunately we can't determine there party from the bill payload so we need to make a call to the elasticsearch
+  index for legislators to obtain this count."
+  [cosponsors es-conn]
+  (let [request-payload (map #(assoc {} :_id (:thomas_id %)) cosponsors)
+        parties (->> (erd/multi-get es-conn "congress" "legislator" request-payload)
+                     (map #(get-in % [:_source :current_term :party])))]
+    {:republican  (count (filter #(= "Republican" %) parties))
+     :democrat    (count (filter #(= "Democrat" %) parties))
+     :independent (count (filter #(= "Independent" %) parties))}))
+
 (defn- cleanse-bill
   "Get only interested bits from parsed bill body."
-  [bill]
+  [bill es-conn]
   (let [last-action (last (get-in bill [:actions]))
         vote-actions (filter-votes-from-actions (get-in bill [:actions]))
         last-vote (last vote-actions)
@@ -127,7 +138,7 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :history (get-in bill [:history]))
         (assoc :sponsor_id (get-in sponsor-details [:thomas_id]))
         (assoc :sponsor sponsor-details)
-        (assoc :cosponsors_count (count (get-in bill [:cosponsors])))
+        (assoc :cosponsors_count (party-affiliation-count (get-in bill [:cosponsors]) es-conn))
         (assoc :related_bill_id (map :bill_id (get-in bill [:related_bills])))
         (assoc :last_action last-action)
         (assoc :urls (get-urls bill))
@@ -151,8 +162,8 @@ first one. Returns nil if not found."
 
 (defn- prepare-bill
   "Do some preparation for indexing."
-  [b]
-  (cleanse-bill b))
+  [b es-conn]
+  (cleanse-bill b es-conn))
 
 (defn- index-billmetadata
   "Index bill metadata under type billmeta"
@@ -165,9 +176,9 @@ check if the bill already exists and does have updated/changed values, firing up
 Redis if does. Also, if document is updated, update ES index too."
   [connections b]
   {:pre [(coll? connections)]}
-  (let [prepared-bill (prepare-bill b)
-        id            (:bill_id b)
-        [es-conn redis-conn] connections]
+  (let [[es-conn redis-conn] connections
+        prepared-bill (prepare-bill b es-conn)
+        id            (:bill_id b)]
     (if-let [found (find-bill es-conn id)]
       (let [old-status (:status found)
             new-status (:status b)]

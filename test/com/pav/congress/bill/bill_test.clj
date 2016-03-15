@@ -2,17 +2,19 @@
   (:use midje.sweet)
   (:require [com.pav.congress.utils.utils :refer [clean-congress-index
                                                   bills
-                                                  connection]]
+                                                  connection
+                                                  legislators legislators-social-media]]
             [com.pav.congress.bill.bill :refer [persist-bills valid-state?]]
+            [com.pav.congress.legislator.legislator :refer [persist-legislators]]
             [clojurewerkz.elastisch.rest.document :as esd]
-            [environ.core :refer [env]]
-            [clojure.data :as d]))
+            [environ.core :refer [env]]))
 
 (against-background [(before :facts (clean-congress-index))]
   (fact "Given a collection of bills, parse and persist to elasticsearch congress index under the type bill"
     (let [;; Sleep until index cleanup completes. This is necessary, since 'persist-bills' will perform query
           ;; and ES will deny any queries until sharding is done, after cleanup. However, simple to ES during this process works.
           _ (Thread/sleep 1000)
+          _ (persist-legislators connection legislators legislators-social-media)
           _ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills)
           persisted-bill (:_source (esd/get connection "congress" "bill" "hr2-114"))]
       persisted-bill => {:bill_id          "hr2-114"
@@ -75,7 +77,7 @@
                          :urls             {:congress     "http://beta.congress.gov/bill/114th/house-bill/2"
                                             :govtrack     "https://www.govtrack.us/congress/bills/114/hr2"
                                             :opencongress "https://www.opencongress.org/bill/hr2-114"}
-                         :cosponsors_count 13
+                         :cosponsors_count {:republican 7 :democrat 6 :independent 0}
                          :subject          "Health"
                          :summary          (clojure.string/replace (get-in (first bills) [:summary :text]) #"\n" "<br />")
                          :keywords         [
