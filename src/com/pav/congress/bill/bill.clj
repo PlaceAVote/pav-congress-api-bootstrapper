@@ -218,11 +218,18 @@ Redis if does. Also, if document is updated, update ES index too."
         (log/infof "Adding bill '%s'..." id)
         (erd/put es-conn "congress" "bill" id prepared-bill)))))
 
+(defn index-bills
+  "Index all bills"
+  [connections bills]
+  (let [[es-conn redis-conn] connections
+        prepared-bills (->> (map #(prepare-bill % es-conn) bills)
+                            (map apply-id))]
+    (esrb/bulk-with-index-and-type es-conn "congress" "bill" (esrb/bulk-index prepared-bills))))
+
 (defn persist-bills
   "Store all bills in ES instance."
   [connections bills]
-  (doseq [b bills]
-    (index-bill! connections b)))
+  (index-bills connections bills))
 
 (defn persist-billmetadata
   "Store all bill metadata in ES instance"
