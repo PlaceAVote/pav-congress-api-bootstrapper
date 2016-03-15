@@ -204,10 +204,10 @@ Redis if does. Also, if document is updated, update ES index too."
                        :old old-status}]
               (log/info (str "Sending to Redis: " msg))
               (try
-                (->> msg
-                     msg/pack
-                     (car/publish "pav-congress-api-bootstrapper")
-                     (wcar redis-conn))
+                (wcar redis-conn
+                  (->> msg
+                       msg/pack
+                       (car/publish "pav-congress-api-bootstrapper")))
                 (catch Exception e
                   (log/error e "Sending bill status message to Redis failed"))))
             ;; update bill
