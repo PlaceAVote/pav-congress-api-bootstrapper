@@ -108,13 +108,14 @@ the second a map of differences found in second bill. If no differences found, r
   "Unfortunately we can't determine there party from the bill payload so we need to make a call to the elasticsearch
   index for legislators to obtain this count."
   [cosponsors es-conn]
-  (if-let [sponsors-to-lookup (map #(assoc {} :_id (:thomas_id %)) cosponsors)]
-    (let [parties (->> (erd/multi-get es-conn "congress" "legislator" sponsors-to-lookup)
+  (if (empty? cosponsors)
+    {:republican 0 :democrat 0 :independent 0}
+    (let [sponsors-to-lookup (map #(assoc {} :_id (:thomas_id %)) cosponsors)
+          parties (->> (erd/multi-get es-conn "congress" "legislator" sponsors-to-lookup)
                     (map #(get-in % [:_source :current_term :party])))]
       {:republican  (count (filter #(= "Republican" %) parties))
        :democrat    (count (filter #(= "Democrat" %) parties))
-       :independent (count (filter #(= "Independent" %) parties))})
-    {:republican 0 :democrat 0 :independent 0}))
+       :independent (count (filter #(= "Independent" %) parties))})))
 
 (defn- cleanse-bill
   "Get only interested bits from parsed bill body."
