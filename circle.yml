@@ -1,11 +1,12 @@
 machine:
   pre:
+    - wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.0.0.tar.gz
+    - tar -xvf elasticsearch-2.0.0.tar.gz
+    - elasticsearch-2.0.0/bin/elasticsearch: {background: true}
     - curl -Ls https://install.convox.com/linux.zip > /tmp/convox.zip
     - sudo unzip /tmp/convox.zip -d /usr/local/bin
   java:
     version: oraclejdk8
-  services:
-    - elasticsearch
 deployment:
   development:
     branch: master
