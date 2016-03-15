@@ -15,6 +15,7 @@
           ;; and ES will deny any queries until sharding is done, after cleanup. However, simple to ES during this process works.
           _ (Thread/sleep 1000)
           _ (persist-legislators connection legislators legislators-social-media)
+          _ (Thread/sleep 1000)
           _ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills)
           persisted-bill (:_source (esd/get connection "congress" "bill" "hr2-114"))]
       persisted-bill => {:bill_id          "hr2-114"
