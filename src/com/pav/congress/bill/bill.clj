@@ -224,6 +224,7 @@ Redis if does. Also, if document is updated, update ES index too."
   (let [[es-conn redis-conn] connections
         prepared-bills (->> (map #(prepare-bill % es-conn) bills)
                             (map apply-id))]
+    (log/info (str "Persisting" (count prepared-bills) "bills"))
     (esrb/bulk-with-index-and-type es-conn "congress" "bill" (esrb/bulk-index prepared-bills))))
 
 (defn persist-bills
