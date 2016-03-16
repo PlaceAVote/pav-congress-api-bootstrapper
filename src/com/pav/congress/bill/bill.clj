@@ -7,6 +7,7 @@
             [clojurewerkz.elastisch.rest.response :as ersp]
             [taoensso.carmine :as car :refer (wcar)]
             [msgpack.core :as msg]
+            [environ.core :refer [env]]
             msgpack.clojure-extensions
             [clojure.tools.logging :as log]
             [clojure.data :as d]
@@ -200,17 +201,18 @@ Redis if does. Also, if document is updated, update ES index too."
                          (-> diff first pprint-str)
                          (-> diff second pprint-str)))
             ;; notify redis about this
-            (let [msg {:id id
-                       :new new-status
-                       :old old-status}]
-              (log/info (str "Sending to Redis: " msg))
-              (try
-                (wcar redis-conn
-                  (->> msg
-                       msg/pack
-                       (car/publish "pav-congress-api-bootstrapper")))
-                (catch Exception e
-                  (log/error e "Sending bill status message to Redis failed"))))
+            (when (:notify-on-index? env)
+              (let [msg {:id id
+                         :new new-status
+                         :old old-status}]
+                (log/info (str "Sending to Redis: " msg))
+                (try
+                  (wcar redis-conn
+                        (->> msg
+                             msg/pack
+                             (car/publish "pav-congress-api-bootstrapper")))
+                  (catch Exception e
+                  (log/error e "Sending bill status message to Redis failed")))))
             ;; update bill
             (log/infof "Updating bill '%s'..." id)
             (erd/replace es-conn "congress" "bill" id prepared-bill))))
