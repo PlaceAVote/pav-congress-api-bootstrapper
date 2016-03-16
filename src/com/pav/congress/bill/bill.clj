@@ -226,7 +226,7 @@ Redis if does. Also, if document is updated, update ES index too."
         prepared-bills (map #(prepare-bill % es-conn) bills)]
     (doseq [{:keys [bill_id] :as b} prepared-bills]
       (log/infof "Re-indexing bill '%s'..." bill_id)
-      (erd/upsert es-conn "congress" "bill" bill_id b))))
+      (erd/put es-conn "congress" "bill" bill_id b))))
 
 (defn persist-bills
   "Store all bills in ES instance."
