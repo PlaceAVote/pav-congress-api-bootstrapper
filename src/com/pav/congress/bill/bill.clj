@@ -1,5 +1,6 @@
 (ns com.pav.congress.bill.bill
   (:require [clojurewerkz.elastisch.rest.bulk :as esrb]
+            [clojurewerkz.elastisch.common.bulk :as ecb]
             [clojurewerkz.elastisch.query :as q]
             [clojurewerkz.elastisch.rest :as r]
             [clojurewerkz.elastisch.rest.document :as erd]
@@ -222,10 +223,10 @@ Redis if does. Also, if document is updated, update ES index too."
   "Index all bills"
   [connections bills]
   (let [[es-conn redis-conn] connections
-        prepared-bills (->> (map #(prepare-bill % es-conn) bills)
-                            (map apply-id))]
-    (log/info (str "Persisting " (count prepared-bills) " bills"))
-    (esrb/bulk-with-index-and-type es-conn "congress" "bill" (esrb/bulk-index prepared-bills))))
+        prepared-bills (map #(prepare-bill % es-conn) bills)]
+    (doseq [{:keys [bill_id] :as b} prepared-bills]
+      (log/infof "Adding bill '%s'..." bill_id)
+      (erd/replace es-conn "congress" "bill" bill_id b))))
 
 (defn persist-bills
   "Store all bills in ES instance."
