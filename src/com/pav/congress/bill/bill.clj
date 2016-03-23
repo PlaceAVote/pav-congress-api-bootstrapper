@@ -201,7 +201,7 @@ Redis if does. Also, if document is updated, update ES index too."
                          (-> diff first pprint-str)
                          (-> diff second pprint-str)))
             ;; notify redis about this
-            (when (:notify-on-index? env)
+            (when (:notify-on-bill-changed? env)
               (let [msg {:id id
                          :new new-status
                          :old old-status}]
@@ -212,7 +212,7 @@ Redis if does. Also, if document is updated, update ES index too."
                              msg/pack
                              (car/publish "pav-congress-api-bootstrapper")))
                   (catch Exception e
-                  (log/error e "Sending bill status message to Redis failed")))))
+                    (log/error e "Sending bill status message to Redis failed")))))
             ;; update bill
             (log/infof "Updating bill '%s'..." id)
             (erd/replace es-conn "congress" "bill" id prepared-bill))))
