@@ -2,7 +2,8 @@
   (:require [aws.sdk.s3 :as s3]
             [cheshire.core :as ch]
             [clojure.tools.logging :as log]
-            [com.pav.congress.bill.bill :refer [persist-bills persist-billmetadata apply-bill-id]]
+            [com.pav.congress.bill.bill :refer [persist-bills persist-billmetadata apply-bill-id
+                                                format-pav-topics]]
             [clojure.core.async :refer [timeout chan alts!! >!! go-loop]]
             [clojure.java.io :as io]
             [clojure.data.csv :as csv]))
@@ -77,6 +78,7 @@
         keys (map keyword (first file-contents))
         metadata (->> (map #(zipmap keys %) (rest file-contents))
                       (map #(apply-bill-id %))
+                      (map format-pav-topics)
                       (map #(dissoc % :comment_infavor :comment_against)))]
     (log/info "Persisting " (count metadata) " Bill Metadata Entries")
     (persist-billmetadata es-connection metadata)))
