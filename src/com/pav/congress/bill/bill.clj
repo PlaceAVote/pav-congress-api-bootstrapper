@@ -150,9 +150,9 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :keywords (get-in bill [:subjects]))
         (assoc :votes vote-actions))))
 
-(defn format-pav-topics [meta]
-  (update-in meta [:pav_topics] #(-> (clojure.string/split % #",")
-                                     clojure.string/trim)))
+(defn format-pav-tags [meta]
+  (update-in meta [:pav_tags] #(->> (clojure.string/split % #",")
+                                    (map clojure.string/trim))))
 
 (defn- find-bill
   "Lookup for bill details in ES and (in case of multiple results), return only
@@ -176,8 +176,10 @@ first one. Returns nil if not found."
   "Index bill metadata under type billmeta"
   [connection bill-metadata]
   (doseq [{:keys [_id] :as m} bill-metadata]
-    (log/info "Replacing Bill metadata for " _id)
-    (erd/replace connection "congress" "billmeta" _id m)))
+    (log/info "Replacing/Indexing Bill metadata for " _id)
+    (if (erd/get connection "congress" "billmeta" _id)
+      (erd/replace connection "congress" "billmeta" _id (dissoc m :_id))
+      (erd/put connection "congress" "billmeta" _id (dissoc m :_id)))))
 
 (defn- index-bill!
   "Index bill. Before actual putting the document inside ES index,
