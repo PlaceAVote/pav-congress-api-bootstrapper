@@ -72,7 +72,10 @@ filling elasticsearch instance."
 
     (->> [:legislator-bucket :bills-prefix]
          (select-keys env)
-         (sync-bills es-redis-connection creds))))
+         (sync-bills es-redis-connection creds))
+
+    (log/info "Refreshing Congress Index")
+    (eri/refresh es-connection "congress")))
 
 (defn- start-billmetadata-sync-job
   "Sync bill meta data from file or s3 resource"

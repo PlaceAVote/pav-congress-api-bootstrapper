@@ -1,9 +1,8 @@
 (ns com.pav.congress.bill.bill
-  (:require [clojurewerkz.elastisch.rest.bulk :as esrb]
-            [clojurewerkz.elastisch.common.bulk :as ecb]
-            [clojurewerkz.elastisch.query :as q]
+  (:require [clojurewerkz.elastisch.query :as q]
             [clojurewerkz.elastisch.rest :as r]
             [clojurewerkz.elastisch.rest.document :as erd]
+            [clojurewerkz.elastisch.rest.index :as eri]
             [clojurewerkz.elastisch.rest.response :as ersp]
             [taoensso.carmine :as car :refer (wcar)]
             [msgpack.core :as msg]
@@ -179,7 +178,8 @@ first one. Returns nil if not found."
     (log/info "Replacing/Indexing Bill metadata for " _id)
     (if (erd/get connection "congress" "billmeta" _id)
       (erd/replace connection "congress" "billmeta" _id (dissoc m :_id))
-      (erd/put connection "congress" "billmeta" _id (dissoc m :_id)))))
+      (erd/put connection "congress" "billmeta" _id (dissoc m :_id))))
+  (eri/refresh connection "congress"))
 
 (defn- index-bill!
   "Index bill. Before actual putting the document inside ES index,
