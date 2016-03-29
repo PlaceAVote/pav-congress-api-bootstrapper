@@ -1,9 +1,8 @@
 (ns com.pav.congress.bill.bill
-  (:require [clojurewerkz.elastisch.rest.bulk :as esrb]
-            [clojurewerkz.elastisch.common.bulk :as ecb]
-            [clojurewerkz.elastisch.query :as q]
+  (:require [clojurewerkz.elastisch.query :as q]
             [clojurewerkz.elastisch.rest :as r]
             [clojurewerkz.elastisch.rest.document :as erd]
+            [clojurewerkz.elastisch.rest.index :as eri]
             [clojurewerkz.elastisch.rest.response :as ersp]
             [taoensso.carmine :as car :refer (wcar)]
             [msgpack.core :as msg]
@@ -151,6 +150,10 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :keywords (get-in bill [:subjects]))
         (assoc :votes vote-actions))))
 
+(defn format-pav-tags [meta]
+  (update-in meta [:pav_tags] #(->> (clojure.string/split % #",")
+                                    (map clojure.string/trim))))
+
 (defn- find-bill
   "Lookup for bill details in ES and (in case of multiple results), return only
 first one. Returns nil if not found."
@@ -171,8 +174,13 @@ first one. Returns nil if not found."
 
 (defn- index-billmetadata
   "Index bill metadata under type billmeta"
-  [connection b]
-  (esrb/bulk-with-index-and-type connection "congress" "billmeta" (esrb/bulk-index b)))
+  [connection bill-metadata]
+  (doseq [{:keys [_id] :as m} bill-metadata]
+    (log/info "Replacing/Indexing Bill metadata for " _id)
+    (if (erd/get connection "congress" "billmeta" _id)
+      (erd/replace connection "congress" "billmeta" _id (dissoc m :_id))
+      (erd/put connection "congress" "billmeta" _id (dissoc m :_id))))
+  (eri/refresh connection "congress"))
 
 (defn- index-bill!
   "Index bill. Before actual putting the document inside ES index,
@@ -224,11 +232,16 @@ Redis if does. Also, if document is updated, update ES index too."
 (defn index-bills
   "Index all bills"
   [connections bills]
-  (let [[es-conn redis-conn] connections
-        prepared-bills (->> (map #(prepare-bill % es-conn) bills)
-                            (map apply-id))]
-    (esrb/bulk-with-index-and-type es-conn "congress" "bill" (ecb/bulk-index prepared-bills))
-    (log/info (str "Persisted " (count prepared-bills) " bills"))))
+  (let [[es-conn _] connections
+        prepared-bills (map #(prepare-bill % es-conn) bills)]
+    (doseq [{:keys [bill_id] :as b} prepared-bills]
+      (if (erd/get es-conn "congress" "bill" bill_id)
+        (do
+          (log/info "Replacing bill " bill_id)
+          (erd/replace es-conn "congress" "bill" bill_id b))
+        (do
+          (log/info "Indexing bill " bill_id)
+          (erd/put es-conn "congress" "bill" bill_id b))))))
 
 (defn persist-bills
   "Store all bills in ES instance."
@@ -237,8 +250,8 @@ Redis if does. Also, if document is updated, update ES index too."
 
 (defn persist-billmetadata
   "Store all bill metadata in ES instance"
-  [connection b]
-  (index-billmetadata connection b))
+  [connection bill-metadata]
+  (index-billmetadata connection bill-metadata))
 
 (comment
   (-> (r/connect "http://127.0.0.1:9200")
