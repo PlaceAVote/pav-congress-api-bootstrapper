@@ -16,7 +16,8 @@
                  [clojure-msgpack "1.1.2"]
                  [org.clojure/tools.cli "0.3.3"]
                  [org.clojure/data.csv "0.1.3"]
-                 [com.taoensso/encore "2.33.0"]]
+                 [com.taoensso/encore "2.33.0"]
+                 [clj-http "2.1.0"]]
   :plugins [[lein-environ "1.0.0"]
 						[lein-release "1.0.5"]]
   :lein-release {:scm :git

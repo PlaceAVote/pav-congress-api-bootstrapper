@@ -11,7 +11,9 @@
             [clojure.tools.logging :as log]
             [clojure.data :as d]
             [clojure.string :refer [lower-case]]
-            [com.pav.congress.utils :refer [pprint-str]]))
+            [com.pav.congress.utils :refer [pprint-str]]
+            [clj-http.client :as http]
+            [aws.sdk.s3 :as s3]))
 
 (defn- apply-id
   "Add _id key to have the same value as bill_id. This is necessary as some ES actions
@@ -172,14 +174,32 @@ first one. Returns nil if not found."
   [b es-conn]
   (cleanse-bill b es-conn))
 
+(defn- upload-featured-image
+  "Upload featured image to s3 bucket"
+  [creds bucket key link]
+  (log/info "Uploading main image for " key)
+  (let [{stream :body headers :headers} (http/get link {:insecure? true :as :stream})]
+    (s3/put-object creds bucket key stream {:content-type (headers "Content-Type")})))
+
+(defn- put-bill-metadata [connection {:keys [_id] :as m}]
+  (log/info "Indexing bill metadata for " _id)
+  (erd/put connection "congress" "billmeta" _id (dissoc m :_id)))
+
+(defn- update-bill-metadata [connection {:keys [_id] :as m}]
+  (log/info "Updating bill metadata for " _id)
+  (erd/update-with-partial-doc connection "congress" "billmeta" _id (dissoc m :_id)))
+
 (defn- index-billmetadata
   "Index bill metadata under type billmeta"
-  [connection bill-metadata]
-  (doseq [{:keys [_id] :as m} bill-metadata]
-    (log/info "Replacing/Indexing Bill metadata for " _id)
-    (if (erd/get connection "congress" "billmeta" _id)
-      (erd/update-with-partial-doc connection "congress" "billmeta" _id (dissoc m :_id))
-      (erd/put connection "congress" "billmeta" _id (dissoc m :_id))))
+  [connection s3-creds bill-metadata]
+  (doseq [{:keys [_id congress bill_id featured_img_link] :as m} bill-metadata]
+    (let [key (str "bills/" congress "/images/" bill_id "/main.jpg")
+          img_url (str "https://cdn.placeavote.com/" key)
+          m-to-persist (assoc m :featured_img_link img_url)]
+      (upload-featured-image s3-creds "placeavote-cdn" key featured_img_link)
+      (if (erd/get connection "congress" "billmeta" _id)
+        (update-bill-metadata connection m-to-persist)
+        (put-bill-metadata connection m-to-persist))))
   (eri/refresh connection "congress"))
 
 (defn- index-bill!
@@ -250,8 +270,8 @@ Redis if does. Also, if document is updated, update ES index too."
 
 (defn persist-billmetadata
   "Store all bill metadata in ES instance"
-  [connection bill-metadata]
-  (index-billmetadata connection bill-metadata))
+  [connection s3-creds bill-metadata]
+  (index-billmetadata connection s3-creds bill-metadata))
 
 (comment
   (-> (r/connect "http://127.0.0.1:9200")

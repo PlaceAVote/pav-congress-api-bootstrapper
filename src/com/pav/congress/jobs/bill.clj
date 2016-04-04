@@ -81,4 +81,4 @@
                       (map format-pav-tags)
                       (map #(dissoc % :comment_infavor :comment_against)))]
     (log/info "Persisting " (count metadata) " Bill Metadata Entries")
-    (persist-billmetadata es-connection metadata)))
+    (persist-billmetadata es-connection cred metadata)))
