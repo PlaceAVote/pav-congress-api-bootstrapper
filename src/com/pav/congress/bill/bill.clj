@@ -258,7 +258,7 @@ Redis if does. Also, if document is updated, update ES index too."
       (if (erd/get es-conn "congress" "bill" bill_id)
         (do
           (log/info "Replacing bill " bill_id)
-          (erd/replace es-conn "congress" "bill" bill_id b))
+          (erd/update-with-partial-doc es-conn "congress" "bill" bill_id b))
         (do
           (log/info "Indexing bill " bill_id)
           (erd/put es-conn "congress" "bill" bill_id b))))))
