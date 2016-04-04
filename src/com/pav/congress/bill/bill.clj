@@ -178,7 +178,7 @@ first one. Returns nil if not found."
   (doseq [{:keys [_id] :as m} bill-metadata]
     (log/info "Replacing/Indexing Bill metadata for " _id)
     (if (erd/get connection "congress" "billmeta" _id)
-      (erd/replace connection "congress" "billmeta" _id (dissoc m :_id))
+      (erd/update-with-partial-doc connection "congress" "billmeta" _id (dissoc m :_id))
       (erd/put connection "congress" "billmeta" _id (dissoc m :_id))))
   (eri/refresh connection "congress"))
 
