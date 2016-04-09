@@ -182,11 +182,10 @@ first one. Returns nil if not found."
 (defn- upload-featured-image
   "Upload featured image to s3 bucket"
   [creds bucket key link]
-  (log/info "Uploading main image for " key)
   (let [{stream :body headers :headers} (http/get link {:insecure? true :as :stream})
         content-type (headers "Content-Type")
-        _ (println "Content " content-type)
         outgoing-stream (format/as-stream (image-resize-fn stream) "jpg")]
+    (log/info "Uploading main image for " key " of type " content-type)
     (s3/put-object creds bucket key outgoing-stream {:content-type content-type})))
 
 (defn- put-bill-metadata [connection {:keys [_id] :as m}]
