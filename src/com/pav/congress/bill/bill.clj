@@ -13,7 +13,10 @@
             [clojure.string :refer [lower-case]]
             [com.pav.congress.utils :refer [pprint-str]]
             [clj-http.client :as http]
-            [aws.sdk.s3 :as s3]))
+            [aws.sdk.s3 :as s3]
+            [image-resizer.format :as format]
+            [image-resizer.resize :refer :all]
+            [image-resizer.scale-methods :refer :all]))
 
 (defn- apply-id
   "Add _id key to have the same value as bill_id. This is necessary as some ES actions
@@ -174,12 +177,17 @@ first one. Returns nil if not found."
   [b es-conn]
   (cleanse-bill b es-conn))
 
+(def image-resize-fn (resize-fn 1000 1000 ultra-quality))
+
 (defn- upload-featured-image
   "Upload featured image to s3 bucket"
   [creds bucket key link]
   (log/info "Uploading main image for " key)
-  (let [{stream :body headers :headers} (http/get link {:insecure? true :as :stream})]
-    (s3/put-object creds bucket key stream {:content-type (headers "Content-Type")})))
+  (let [{stream :body headers :headers} (http/get link {:insecure? true :as :stream})
+        content-type (headers "Content-Type")
+        _ (println "Content " content-type)
+        outgoing-stream (format/as-stream (image-resize-fn stream) "jpg")]
+    (s3/put-object creds bucket key outgoing-stream {:content-type content-type})))
 
 (defn- put-bill-metadata [connection {:keys [_id] :as m}]
   (log/info "Indexing bill metadata for " _id)
