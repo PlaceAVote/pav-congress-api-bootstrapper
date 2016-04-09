@@ -177,14 +177,16 @@ first one. Returns nil if not found."
   [b es-conn]
   (cleanse-bill b es-conn))
 
-(def image-resize-fn (resize-fn 1000 1000 ultra-quality))
+(def image-resize-fn
+  (fn [width height]
+    (resize-fn width height ultra-quality)))
 
 (defn- upload-featured-image
   "Upload featured image to s3 bucket"
-  [creds bucket key link]
+  [creds bucket key img-width img-height link]
   (let [{stream :body headers :headers} (http/get link {:insecure? true :as :stream})
         content-type (headers "Content-Type")
-        outgoing-stream (format/as-stream (image-resize-fn stream) "jpg")]
+        outgoing-stream (format/as-stream ((image-resize-fn img-width img-height) stream) "jpg")]
     (log/info "Uploading main image for " key " of type " content-type)
     (s3/put-object creds bucket key outgoing-stream {:content-type content-type})))
 
@@ -200,10 +202,17 @@ first one. Returns nil if not found."
   "Index bill metadata under type billmeta"
   [connection s3-creds bill-metadata]
   (doseq [{:keys [_id congress bill_id featured_img_link] :as m} bill-metadata]
-    (let [key (str "bills/" congress "/images/" bill_id "/main.jpg")
-          img_url (str "https://cdn.placeavote.com/" key)
-          m-to-persist (assoc m :featured_img_link img_url)]
-      (upload-featured-image s3-creds "placeavote-cdn" key featured_img_link)
+    (let [site-key (str "bills/" congress "/images/" bill_id "/main.jpg")
+          fb-key (str "bills/" congress "/images/" bill_id "/fb.jpg")
+          twitter-key (str "bills/" congress "/images/" bill_id "/twitter.jpg")
+          img_url (str "https://cdn.placeavote.com/" site-key)
+          fb_url (str "https://cdn.placeavote.com/" fb-key)
+          twitter_url (str "https://cdn.placeavote.com/" twitter-key)
+          m-to-persist (assoc m :featured_img_link img_url
+                                :featured_img_links {:site_url img_url :facebook_url fb_url :twitter_url twitter_url})]
+      (upload-featured-image s3-creds "placeavote-cdn" site-key 1000 1000 featured_img_link)
+      (upload-featured-image s3-creds "placeavote-cdn" fb-key 900 473 featured_img_link)
+      (upload-featured-image s3-creds "placeavote-cdn" twitter-key 280 150 featured_img_link)
       (if (erd/get connection "congress" "billmeta" _id)
         (update-bill-metadata connection m-to-persist)
         (put-bill-metadata connection m-to-persist))))
