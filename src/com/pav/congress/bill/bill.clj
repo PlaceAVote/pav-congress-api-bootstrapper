@@ -4,6 +4,8 @@
             [clojurewerkz.elastisch.rest.document :as erd]
             [clojurewerkz.elastisch.rest.index :as eri]
             [clojurewerkz.elastisch.rest.response :as ersp]
+            [clojurewerkz.elastisch.rest.bulk :as erb]
+            [clojurewerkz.elastisch.common.bulk :as ecb]
             [taoensso.carmine :as car :refer (wcar)]
             [msgpack.core :as msg]
             [environ.core :refer [env]]
@@ -267,22 +269,26 @@ Redis if does. Also, if document is updated, update ES index too."
 
 (defn index-bills
   "Index all bills"
-  [connections bills]
+  [connections bills {:keys [reindex]}]
   (let [[es-conn _] connections
         prepared-bills (map #(prepare-bill % es-conn) bills)]
-    (doseq [{:keys [bill_id] :as b} prepared-bills]
-      (if (erd/get es-conn "congress" "bill" bill_id)
-        (do
-          (log/info "Replacing bill " bill_id)
-          (erd/update-with-partial-doc es-conn "congress" "bill" bill_id b))
-        (do
-          (log/info "Indexing bill " bill_id)
-          (erd/put es-conn "congress" "bill" bill_id b))))))
+    (if reindex
+      (let [batch (-> (map apply-id prepared-bills) ecb/bulk-index)]
+        (erb/bulk-with-index-and-type es-conn "congress" "bill" batch)
+        (log/info (str "Reindexing " (count batch) " bills to Elasticsearch")))
+      (doseq [{:keys [bill_id] :as b} prepared-bills]
+        (if (erd/get es-conn "congress" "bill" bill_id)
+          (do
+            (log/info "Replacing bill " bill_id)
+            (erd/update-with-partial-doc es-conn "congress" "bill" bill_id b))
+          (do
+            (log/info "Indexing bill " bill_id)
+            (erd/put es-conn "congress" "bill" bill_id b)))))))
 
 (defn persist-bills
   "Store all bills in ES instance."
-  [connections bills]
-  (index-bills connections bills))
+  [connections bills opts]
+  (index-bills connections bills opts))
 
 (defn persist-billmetadata
   "Store all bill metadata in ES instance"

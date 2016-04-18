@@ -13,7 +13,7 @@
   [map]
   (contains? map :drained))
 
-(defn batch-and-persist [connections channel batch-size promise]
+(defn batch-and-persist [connections channel batch-size promise opts]
   (go-loop []
     (let [timeout-chan (timeout 5000)
           batch (->> (range batch-size)
@@ -22,11 +22,11 @@
                               result)))
                      (remove (comp nil?)))]
       (if (-> batch last drained?)
-        (do (persist-bills connections (filter #(not (contains? % :drained)) batch))
+        (do (persist-bills connections (filter #(not (contains? % :drained)) batch) opts)
             (deliver promise true))
         (do
           (when-not (empty? batch)
-            (persist-bills connections batch))
+            (persist-bills connections batch opts))
           (recur))))))
 
 (defn- filter-json-keys
@@ -52,11 +52,11 @@
     (do (log/info "Finished gathering Bill keys from s3")
         (conj keys :finished))))
 
-(defn sync-bills [connections cred s3-info]
+(defn sync-bills [connections cred s3-info opts]
   (log/info "Started Syncing Bills")
   (let [promise (promise)
         channel (chan 1024)
-        _ (batch-and-persist connections channel 100 promise)
+        _ (batch-and-persist connections channel 100 promise opts)
         keys (->> (gather-all-keys-for cred [] (:legislator-bucket s3-info) (:bills-prefix s3-info) nil true nil)
                   ;; TODO: move (complement nil?) to own name (e.g. 'not-nil?' fn)
                   (filterv (complement nil?)))]

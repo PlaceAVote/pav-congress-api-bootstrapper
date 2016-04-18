@@ -16,7 +16,7 @@
           _ (Thread/sleep 1000)
           _ (persist-legislators connection legislators legislators-social-media)
           _ (Thread/sleep 1000)
-          _ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills)
+          _ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills {:reindex false})
           persisted-bill (:_source (esd/get connection "congress" "bill" "hr2-114"))]
       persisted-bill => {:bill_id          "hr2-114"
                          :bill_type        "hr"
@@ -169,7 +169,7 @@
 
 	(future-fact "Given a collection of bills, verify hr1764 subject term is politics"
 		(let [_ (Thread/sleep 1000)
-					_ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills)
+					_ (persist-bills [connection {:spec {:uri (:redis-url env)}}]  bills {:reindex false})
 					{politics :subject} (:_source (esd/get connection "congress" "bill" "hr1764-114"))
 					{defense :subject} (:_source (esd/get connection "congress" "bill" "hr4127-114"))
 					{technology :subject} (:_source (esd/get connection "congress" "bill" "hr2669-114"))

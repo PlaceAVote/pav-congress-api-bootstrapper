@@ -51,7 +51,7 @@ logging functions. Returns only exit-code."
 (defn- start-sync-job
   "Start sync job, by connecting to S3 with set credentials, parsing them and
 filling elasticsearch instance."
-  []
+  [& opts]
   (let [es-url (:es-url env)
         es-connection (connect es-url)
         redis-url {:spec {:uri (:redis-url env)} :pool {}}
@@ -70,9 +70,7 @@ filling elasticsearch instance."
          (select-keys env)
          (sync-committees es-connection creds))
 
-    (->> [:legislator-bucket :bills-prefix]
-         (select-keys env)
-         (sync-bills es-redis-connection creds))
+    (sync-bills es-redis-connection creds (select-keys env [:legislator-bucket :bills-prefix]) (first opts))
 
     (log/info "Refreshing Congress Index")
     (eri/refresh es-connection "congress")))
@@ -88,10 +86,10 @@ filling elasticsearch instance."
 
 (defn- run-all
   "Run everything."
-  []
+  [& opts]
   (try
-    (start-rsync-script)
-    (start-sync-job)
+    ;(start-rsync-script)
+    (start-sync-job (first opts))
     (catch Exception e
       ;; log error so we can know if something happened with es or s3 connection
       (log/error e "Sync job failed:"))))
@@ -116,7 +114,8 @@ filling elasticsearch instance."
   [["-h" "--help" "Print Help"]
    [nil "--run-job" "Run Bootstrapper Job" :default false :flag true]
    [nil "--schedule-job" "Schedule Bootstrapper Job" :default false :flag true]
-   [nil "--sync-billmetadata" "Sync Bill Metadata from File" :default false :flag true]])
+   [nil "--sync-billmetadata" "Sync Bill Metadata from File" :default false :flag true]
+   [nil "--reindex-bills" "Bulk index all bills" :default false :flag true]])
 
 (defn usage [options-summary]
   (->> ["Congress Bootstrapper Usage."
@@ -130,6 +129,7 @@ filling elasticsearch instance."
         "  --run-job             Run Bootstrapper Job"
         "  --schedule-job        Schedule Bootstrapper Job"
         "  --sync-billmetadata   Sync bill meta data from file"
+        "  --reindex-bills       Bulk index all bills"
         ""
         "Please refer to the manual page for more information."]
     (clojure.string/join \newline)))
@@ -152,7 +152,7 @@ filling elasticsearch instance."
       (exit 0 (usage summary)))
     (when (true? (:run-job options))
       (log/info "Running Bootstrapper Job Now")
-      (run-all))
+      (run-all {:reindex (:reindex-bills options)}))
     (when (true? (:schedule-job options))
       (log/info "Scheduling Bootstrapper Job Now")
       (init-quartz-job))
