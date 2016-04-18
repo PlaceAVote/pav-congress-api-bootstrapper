@@ -274,16 +274,16 @@ Redis if does. Also, if document is updated, update ES index too."
         prepared-bills (map #(prepare-bill % es-conn) bills)]
     (if reindex
       (let [batch (-> (map apply-id prepared-bills) ecb/bulk-index)]
-        (erb/bulk-with-index-and-type es-conn "congress" "bill" batch)
+        (erb/bulk-with-index-and-type es-conn "congress" "bill" batch {:refresh true})
         (log/info (str "Reindexing " (count batch) " bills to Elasticsearch")))
       (doseq [{:keys [bill_id] :as b} prepared-bills]
         (if (erd/get es-conn "congress" "bill" bill_id)
           (do
             (log/info "Replacing bill " bill_id)
-            (erd/update-with-partial-doc es-conn "congress" "bill" bill_id b))
+            (erd/update-with-partial-doc es-conn "congress" "bill" bill_id b {:refresh true}))
           (do
             (log/info "Indexing bill " bill_id)
-            (erd/put es-conn "congress" "bill" bill_id b)))))))
+            (erd/put es-conn "congress" "bill" bill_id b {:refresh true})))))))
 
 (defn persist-bills
   "Store all bills in ES instance."
