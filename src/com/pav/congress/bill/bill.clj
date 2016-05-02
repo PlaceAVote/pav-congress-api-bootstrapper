@@ -109,8 +109,10 @@ the second a map of differences found in second bill. If no differences found, r
 (defn apply-bill-id
   "Assoc bill_id with :_id field"
   [bill]
-  (assoc bill :_id (str (:bill_id bill) "-" (:congress bill))
-              :bill_id (str (:bill_id bill) "-" (:congress bill))))
+  (->
+    (update-in bill [:bill_id] clojure.string/trim)
+    (assoc :_id (str (:bill_id bill) "-" (:congress bill))
+           :bill_id (str (:bill_id bill) "-" (:congress bill)))))
 
 (defn party-affiliation-count
   "Unfortunately we can't determine there party from the bill payload so we need to make a call to the elasticsearch
