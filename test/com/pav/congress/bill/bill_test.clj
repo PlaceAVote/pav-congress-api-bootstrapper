@@ -75,10 +75,10 @@
                                             :type       "vote"
                                             :vote_type  "vote2"
                                             :where      "s"}
-                         :last_version     nil
                          :urls             {:congress     "http://beta.congress.gov/bill/114th/house-bill/2"
                                             :govtrack     "https://www.govtrack.us/congress/bills/114/hr2"
                                             :opencongress "https://www.opencongress.org/bill/hr2-114"}
+                         :last_version     nil
                          :cosponsors_count {:republican 7 :democrat 6 :independent 0}
                          :subject          "Health"
                          :summary          (clojure.string/replace (get-in (first bills) [:summary :text]) #"\n" "<br />")
