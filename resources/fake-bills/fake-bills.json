@@ -1,0 +1,35 @@
+[{
+  "actions": [],
+  "amendments": [],
+  "bill_id": "ma06001-114",
+  "bill_type": "ma",
+  "by_request": false,
+  "committees": [],
+  "congress": "114",
+  "cosponsors": [],
+  "enacted_as": null,
+  "history": {},
+  "introduced_at": "2016-05-01",
+  "number": "2673",
+  "official_title": "Should Kinder Morgan be Allowed to Build a Pipeline Through Massachusetts?",
+  "popular_title": "Should Kinder Morgan be Allowed to Build a Pipeline Through Massachusetts?",
+  "related_bills": [],
+  "short_title": "Should Kinder Morgan be Allowed to Build a Pipeline Through Massachusetts?",
+  "sponsor": {
+    "district": "6",
+    "name": "Moulton, Seth",
+    "state": "MA",
+    "thomas_id": "02246",
+    "title": "Rep",
+    "type": "person"
+  },
+  "status": "REFERRED",
+  "status_at": "2016-05-01",
+  "subjects": [
+    "Environment"
+  ],
+  "subjects_top_term": "Environment",
+  "summary": null,
+  "titles": [],
+  "updated_at": "2016-05-07T07:35:35-04:00"
+}]

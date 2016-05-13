@@ -82,3 +82,7 @@
                       (map #(dissoc % :comment_infavor :comment_against)))]
     (log/info "Persisting " (count metadata) " Bill Metadata Entries")
     (persist-billmetadata es-connection cred metadata)))
+
+(defn sync-fake-bills [es-connection file-loc]
+  (let [fbs (ch/parse-string (slurp file-loc) true)]
+    (persist-bills [es-connection] fbs {:reindex true})))

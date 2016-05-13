@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [com.pav.congress.jobs.legislator :refer [sync-legislators]]
             [com.pav.congress.jobs.committee :refer [sync-committees]]
-            [com.pav.congress.jobs.bill :refer [sync-bills sync-billmetadata]]
+            [com.pav.congress.jobs.bill :refer [sync-bills sync-billmetadata sync-fake-bills]]
             [environ.core :refer [env]]
             [clojurewerkz.elastisch.rest :refer [connect]]
             [clojure.tools.logging :as log]
@@ -84,6 +84,14 @@ filling elasticsearch instance."
     (log/infof "Connecting to ElasticSearch at %s..." es-url)
     (sync-billmetadata es-connection creds bucket prefix)))
 
+(defn start-syncing-fake-bills
+  "Temporary job to sync fake bills"
+  []
+  (let [es-url (:es-url env)
+        es-connection (connect es-url)]
+    (log/infof "Connecting to ElasticSearch at %s..." es-url)
+    (sync-fake-bills es-connection "resources/fake-bills/fake-bills.json")))
+
 (defn- run-all
   "Run everything."
   [& opts]
@@ -115,6 +123,7 @@ filling elasticsearch instance."
    [nil "--run-job" "Run Bootstrapper Job" :default false :flag true]
    [nil "--schedule-job" "Schedule Bootstrapper Job" :default false :flag true]
    [nil "--sync-billmetadata" "Sync Bill Metadata from File" :default false :flag true]
+   [nil "--sync-fakebills" "Upload Fake bills" :default false :flag true]
    [nil "--reindex-bills" "Bulk index all bills" :default false :flag true]])
 
 (defn usage [options-summary]
@@ -129,6 +138,7 @@ filling elasticsearch instance."
         "  --run-job             Run Bootstrapper Job"
         "  --schedule-job        Schedule Bootstrapper Job"
         "  --sync-billmetadata   Sync bill meta data from file"
+        "  --sync-fakebills      Sync fake bills"
         "  --reindex-bills       Bulk index all bills"
         ""
         "Please refer to the manual page for more information."]
@@ -157,4 +167,6 @@ filling elasticsearch instance."
       (log/info "Scheduling Bootstrapper Job Now")
       (init-quartz-job))
     (when (:sync-billmetadata options)
-      (start-billmetadata-sync-job (:bill-metadata-bucket env) (:bill-metadata-prefix env)))))
+      (start-billmetadata-sync-job (:bill-metadata-bucket env) (:bill-metadata-prefix env)))
+    (when (:sync-fakebills options)
+      (start-syncing-fake-bills))))
