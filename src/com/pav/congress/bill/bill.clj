@@ -154,6 +154,7 @@ the second a map of differences found in second bill. If no differences found, r
         (assoc :related_bill_id (map :bill_id (get-in bill [:related_bills])))
         (assoc :last_action last-action)
         (assoc :urls (get-urls bill))
+        (assoc :last_version (:last_version bill))
         (assoc :last_vote last-vote)
         (assoc :summary (prepare-bill-summary (get-in bill [:summary :text])))
         (assoc :keywords (get-in bill [:subjects]))
