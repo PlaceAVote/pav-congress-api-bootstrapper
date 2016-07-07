@@ -18,6 +18,7 @@
                  [org.clojure/data.csv "0.1.3"]
                  [com.taoensso/encore "2.33.0"]
                  [clj-http "2.1.0"]
+                 [com.twelvemonkeys.imageio/imageio-jpeg "3.2.1"]
                  [image-resizer "0.1.9"]]
   :plugins [[lein-environ "1.0.0"]
 						[lein-release "1.0.5"]]
